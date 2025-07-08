@@ -8,8 +8,8 @@ defmodule Pollex.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: Pollex.Worker.start_link(arg)
-      # {Pollex.Worker, arg}
+      {Pollex, "Hello,World"},
+      {ReqPollerCache, [request: "https://google.com", interval: :timer.seconds(30)]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
