@@ -23,7 +23,8 @@ defmodule Pollex.MixProject do
   defp deps do
     [
       {:req, "~> 0.5.0"},
-      {:mox, "~> 1.2.0", only: :test}
+      {:mox, "~> 1.2.0", only: :test},
+      {:ex_doc, "~> 0.12"}
     ]
   end
 end

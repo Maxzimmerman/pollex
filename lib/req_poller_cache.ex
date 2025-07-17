@@ -1,11 +1,24 @@
 defmodule ReqPollerCache do
+  @moduledoc """
+    Provides methods for fetching and recieving data.
+    To use it just add the following to your applicaion.ex it needs three inputs: request, interval and name
+
+      {ReqPollerCache, [request: "https://google.com", interval: :timer.seconds(30), name: ReqPollerCache]}
+  """
+
   use GenServer
 
+  @doc """
+    Starts the process with a given name
+  """
   def start_link(opts) do
     name = Keyword.fetch!(opts, :name)
     GenServer.start_link(__MODULE__, opts, name: name)
   end
 
+  @doc """
+    Initalizes the process with a default state given in opts
+  """
   def init(opts) do
     request = Keyword.fetch!(opts, :request)
     interval = Keyword.get(opts, :interval, :timer.seconds(60))
@@ -16,26 +29,30 @@ defmodule ReqPollerCache do
   end
 
   def handle_info(:poll, %{request: req, interval: interval, name: name} = state) do
-    IO.inspect(state)
     Task.start(fn ->
       case Req.get(req) do
         {:ok, resp} ->
-          IO.puts "SUCCESS"
           GenServer.cast(name, {:update, resp.body})
         _ ->
-          IO.puts "FAIL"
-          :noop
+        :noop
     end
-  end)
+    end)
 
-  schedule_poll(interval)
-    {:noreply, state}
+    schedule_poll(interval)
+      {:noreply, state}
   end
 
   def handle_cast({:update, data}, state) do
     {:noreply, %{state | data: data}}
   end
 
+  @doc """
+    Gets the lates fetched data.
+
+      iex> cached = ReqPollerCache.get(ReqPollerCache)
+      iex> cached
+      nil
+  """
   def get(name), do: GenServer.call(name, :get)
 
   def handle_call(:get, _from, state), do: {:reply, state.data, state}
