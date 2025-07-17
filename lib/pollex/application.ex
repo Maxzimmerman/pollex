@@ -8,8 +8,7 @@ defmodule Pollex.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      {Pollex, "Hello,World"},
-      {ReqPollerCache, [request: "https://google.com", interval: :timer.seconds(30)]}
+      {ReqPollerCache, [request: "https://google.com", interval: :timer.seconds(30), name: ReqPollerCache]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
