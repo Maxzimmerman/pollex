@@ -34,12 +34,13 @@ defmodule ReqPollerCache do
         {:ok, resp} ->
           GenServer.cast(name, {:update, resp.body})
         _ ->
-        :noop
-    end
+          :noop
+        Req.get(req)
+      end
     end)
 
     schedule_poll(interval)
-      {:noreply, state}
+    {:noreply, state}
   end
 
   def handle_cast({:update, data}, state) do

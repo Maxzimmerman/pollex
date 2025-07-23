@@ -1,6 +1,16 @@
 # Pollex
 
-**TODO: Add description**
+Pollex is a lightweight polling engine built as a GenServer, making it ideal for OTP-driven Elixir applications. It provides a simple interface for scheduling and executing polling logic on configurable intervals.
+
+## Features
+
+    ✅ Built with native GenServer
+
+    🔁 Customizable polling intervals
+
+    🔌 Plug-and-play architecture for OTP apps
+
+    ⚡ Lightweight and efficient
 
 ## Installation
 
