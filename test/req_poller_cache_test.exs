@@ -2,7 +2,6 @@ defmodule PllEngineTest do
   # This ensures each test has its own fresh isolated process provided by the setup
   use ExUnit.Case, async: true
   import ExUnit.CaptureLog
-  doctest ReqPollerCache
 
   setup do
     name = :"poller_test_#{System.unique_integer()}"
@@ -22,7 +21,7 @@ defmodule PllEngineTest do
   end
 
   # Test by manually call the send function
-  test "test check the state initialy and after triggering the poll", %{name: name, pid: pid, interval: interval} do
+  test "test check the state initialy and after triggering the poll", %{name: name, interval: interval} do
     # initialy the state should be nil
     assert ReqPollerCache.get(name) == nil
 

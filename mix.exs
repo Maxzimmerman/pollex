@@ -11,7 +11,7 @@ defmodule Pollex.MixProject do
       description: "An Elixir polling and HTTP abstraction library",
       package: package(),
       name: "pollex",
-      source_url: "https://github.com/https://github.com/Maxzimmerman/pollex",
+      source_url: "https://github.com/Maxzimmerman/pollex",
       docs: [main: "readme", extras: ["README.md"]]
     ]
   end
@@ -19,8 +19,7 @@ defmodule Pollex.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
-      mod: {Pollex.Application, []}
+      extra_applications: [:logger]
     ]
   end
 

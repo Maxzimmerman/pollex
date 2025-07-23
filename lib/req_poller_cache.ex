@@ -8,6 +8,7 @@ defmodule ReqPollerCache do
 
   use GenServer
 
+  @spec start_link(keyword()) :: :ignore | {:error, any()} | {:ok, pid()}
   @doc """
     Starts the process with a given name
   """
