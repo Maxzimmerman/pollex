@@ -11,6 +11,7 @@ defmodule Cache do
   end
 
   @spec init(any()) :: {:ok, %{}}
+  @impl true
   def init(_init_arg) do
     lookup(:domain, "prefix")
     refresh(:domain)
@@ -27,5 +28,11 @@ defmodule Cache do
   @impl true
   def refresh(_domain) do
     :ok
+  end
+
+  @spec schedule_refresh(integer()) :: any()
+  @impl true
+  def schedule_refresh(interval) do
+    Process.send_after(self(), :poll, interval)
   end
 end
