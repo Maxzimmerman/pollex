@@ -3,7 +3,7 @@ defmodule Pollex.Application do
 
   def start(_type, _args) do
     children = [
-      {ReqPollerCache, [request: "https://google.com", interval: :timer.seconds(30), name: :t]}
+
     ]
 
     opts = [strategy: :one_for_one, name: Pollex.Supervisor]
