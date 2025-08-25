@@ -6,7 +6,13 @@ defmodule PllEngineTest do
   setup do
     name = :"poller_test_#{System.unique_integer()}"
     interval = 1
-    pid = start_supervised!({ReqPollerCache, [request: "http://google.com", interval: :timer.seconds(interval), name: name]})
+
+    pid =
+      start_supervised!(
+        {ReqPollerCache,
+         [request: "http://google.com", interval: :timer.seconds(interval), name: name]}
+      )
+
     {:ok, name: name, pid: pid, interval: interval}
   end
 
@@ -21,7 +27,10 @@ defmodule PllEngineTest do
   end
 
   # Test by manually call the send function
-  test "test check the state initialy and after triggering the poll", %{name: name, interval: interval} do
+  test "test check the state initialy and after triggering the poll", %{
+    name: name,
+    interval: interval
+  } do
     # initialy the state should be nil
     assert ReqPollerCache.get(name) == nil
 
@@ -35,15 +44,17 @@ defmodule PllEngineTest do
     interval = 1
     bad_url = "http://localhost:9999"
 
-    pid = start_supervised!(
-      {ReqPollerCache, [request: bad_url, interval: :timer.seconds(interval), name: name]},
-      id: name
-    )
+    pid =
+      start_supervised!(
+        {ReqPollerCache, [request: bad_url, interval: :timer.seconds(interval), name: name]},
+        id: name
+      )
 
-    log = capture_log(fn ->
-      send(pid, :poll)
-      Process.sleep(200)
-    end)
+    log =
+      capture_log(fn ->
+        send(pid, :poll)
+        Process.sleep(200)
+      end)
 
     assert log =~ "got exception, will retry"
   end

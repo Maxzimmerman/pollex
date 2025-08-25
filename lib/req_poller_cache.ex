@@ -34,9 +34,10 @@ defmodule ReqPollerCache do
       case Req.get(req) do
         {:ok, resp} ->
           GenServer.cast(name, {:update, resp.body})
+
         _ ->
           :noop
-        Req.get(req)
+          Req.get(req)
       end
     end)
 
