@@ -7,4 +7,4 @@ config :pollex, Pollex.Application,
       source: {EctoAdapter, [table: "references_unlocodes", columns: [:code]]},
       cache: {GenserverCacheAdapter, []}
     }
-}
+  }

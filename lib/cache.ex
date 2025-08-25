@@ -5,7 +5,6 @@ defmodule Cache do
   @spec start_link(keyword()) :: :ignore | {:error, any()} | {:ok, pid()}
   def start_link(opts) do
     IO.puts("Called")
-    IO.inspect(opts)
     name = Keyword.fetch!(opts, :name)
     GenServer.start_link(__MODULE__, opts, name: name)
   end
