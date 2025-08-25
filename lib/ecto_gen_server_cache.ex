@@ -34,7 +34,12 @@ defmodule EctoGenServerCache do
 
   # Genserver callback to get the data in the state
   @impl true
-  def handle_call(:get, _from, state), do: {:reply, state.data, state}
+  def handle_call(:get, _from, %{data: data, columns: columns} = state) do
+    data = Enum.map(data, fn t ->
+      Map.take(t, columns)
+    end)
+    {:reply, data, state}
+  end
 
   # Genserver callback to set the data in the state
   @impl true
@@ -42,9 +47,10 @@ defmodule EctoGenServerCache do
     {:noreply, %{state | data: data}}
   end
 
-  @spec lookup(atom(), binary()) :: list(map())
+  # Public api function which calls the Genserver callback to fetch the data
+  @spec lookup(atom()) :: list(map())
   @impl true
-  def lookup(_domain, _prefix) do
-    [%{}]
+  def lookup(name) do
+    GenServer.call(name, :get)
   end
 end

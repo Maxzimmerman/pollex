@@ -20,11 +20,12 @@ defmodule Pollex.Application do
     datasets = Application.get_env(:pollex, __MODULE__)[:datasets]
 
     Enum.each(datasets, fn dataset ->
-      {_dataset_name, %{cache: cache, source: source, refresh_interval_seconds: rate}} = dataset
+      {dataset_name, %{cache: cache, source: source, refresh_interval_seconds: rate}} = dataset
 
       case [cache, source] do
         [{GenServerCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
-          process_name = Ecto.UUID.generate() |> String.to_atom()
+          process_name = dataset_name
+          IO.puts(process_name)
 
           {:ok, _pid} =
             DynamicSupervisor.start_child(
