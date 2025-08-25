@@ -1,6 +1,6 @@
 import Config
 
-config :pollex, ReferenceCache,
+config :pollex, Pollex.Application,
   datasets: %{
     unlocodes: %{
       refresh_interval_seconds: 60,
