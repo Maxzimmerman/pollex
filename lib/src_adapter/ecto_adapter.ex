@@ -19,19 +19,21 @@ defmodule SrcAdapter.EctoAdapter do
       Represents the initial data provider
       It calls the handle cast Genserver callback to save the data in the state
       """
-      @spec load(Keyword.t()) :: [map()]
+      @spec load(Keyword.t()) :: {:ok, list()}
       @impl true
       def load(table) do
         query =
           from e in table,
             select: e.name
-        IO.inspect(query)
-        Repo.all(query)
+
+        data = Repo.all(query)
+        {:ok, data}
       end
 
       @spec schedule_refresh(integer()) :: any()
       @impl true
       def schedule_refresh(interval) do
+        IO.puts("called scheduler")
         Process.send_after(self(), :poll, interval)
       end
 

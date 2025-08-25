@@ -16,6 +16,9 @@ defmodule CacheAdapter.GenserverCacheAdapter do
         GenServer.start_link(__MODULE__, opts, name: name)
       end
 
+      @doc """
+      Represents the public api to fetch the data
+      """
       @spec lookup(atom(), binary()) :: list(map())
       def lookup(_domain, _prefix) do
         raise "lookup/1 must be implemented"

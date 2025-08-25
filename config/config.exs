@@ -3,7 +3,7 @@ import Config
 config :pollex, Pollex.Application,
   datasets: %{
     unlocodes: %{
-      refresh_interval_seconds: 60,
+      refresh_interval_seconds: 6,
       source: {EctoSourceAdapter, [table: "cities"]},
       cache: {GenServerCacheAdapter, [columns: [:name]]}
     }

@@ -10,9 +10,26 @@ defmodule EctoGenServerCache do
     interval = Keyword.fetch!(opts, :refresh_rate)
     columns = Keyword.fetch!(opts, :cache_opts)[:columns]
 
+    interval = :timer.seconds(interval)
     data = load(table)
-    IO.inspect(data)
+
+    schedule_refresh(interval)
     {:ok, %{table: table, columns: columns, interval: interval, name: name, data: data}}
+  end
+
+  # Genserver callback to dynamicly update the state by calling the
+  # handle cast genserver callback
+  @impl true
+  def handle_info(:poll, %{table: table, name: name, interval: interval} = state) do
+    Task.start(fn ->
+      case load(table) do
+        {:ok, data} ->
+          GenServer.cast(name, {:update, data})
+      end
+    end)
+    IO.puts("called handle_info")
+    schedule_refresh(interval)
+    {:noreply, state}
   end
 
   # Genserver callback to get the data in the state
@@ -25,9 +42,6 @@ defmodule EctoGenServerCache do
     {:noreply, %{state | data: data}}
   end
 
-  @doc """
-  Represents the public api to fetch the data
-  """
   @spec lookup(atom(), binary()) :: list(map())
   @impl true
   def lookup(_domain, _prefix) do
