@@ -1,4 +1,4 @@
-defmodule Cache do
+defmodule EctoGenServerCache do
   use CacheAdapter.GenserverCacheAdapter
   use SrcAdapter.EctoAdapter
 

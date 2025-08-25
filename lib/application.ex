@@ -28,7 +28,7 @@ defmodule Pollex.Application do
           {:ok, _pid} =
             DynamicSupervisor.start_child(
               Pollex.DynamicSupervisor,
-              {Cache,
+              {EctoGenServerCache,
                [
                  name: process_name,
                  cache_opts: cache_opts,
