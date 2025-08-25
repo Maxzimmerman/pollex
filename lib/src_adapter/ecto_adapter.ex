@@ -4,7 +4,7 @@ defmodule SrcAdapter.EctoAdapter do
   initally get the data from the db and referesh it
   """
   alias Pollex.Repo
-  @callback load(table :: Keyword.t()) :: [map()]
+  @callback load(table :: Ecto.Schema) :: {:ok, list()}
   @callback schedule_refresh(interval :: integer()) :: any()
 
   @spec __using__(any()) :: any()
@@ -19,14 +19,11 @@ defmodule SrcAdapter.EctoAdapter do
       Represents the initial data provider
       It calls the handle cast Genserver callback to save the data in the state
       """
-      @spec load(Keyword.t()) :: {:ok, list()}
+      @spec load(Ecto.Schema) :: {:ok, list()}
       @impl true
+      # TODO table should be the schema module not a string
       def load(table) do
-        query =
-          from e in table,
-            select: e.name
-
-        data = Repo.all(query)
+        data = Repo.all(table)
         {:ok, data}
       end
 

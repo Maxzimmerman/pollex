@@ -13,6 +13,8 @@ defmodule EctoGenServerCache do
     interval = :timer.seconds(interval)
     data = load(table)
 
+    IO.inspect(data)
+
     schedule_refresh(interval)
     {:ok, %{table: table, columns: columns, interval: interval, name: name, data: data}}
   end
@@ -27,7 +29,9 @@ defmodule EctoGenServerCache do
           GenServer.cast(name, {:update, data})
       end
     end)
+
     IO.puts("called handle_info")
+    IO.inspect(state.data)
     schedule_refresh(interval)
     {:noreply, state}
   end

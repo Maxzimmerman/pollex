@@ -1,10 +1,11 @@
 import Config
 
+# TODO table should be the schema module not a string
 config :pollex, Pollex.Application,
   datasets: %{
     unlocodes: %{
       refresh_interval_seconds: 6,
-      source: {EctoSourceAdapter, [table: "cities"]},
+      source: {EctoSourceAdapter, [table: Pollex.City]},
       cache: {GenServerCacheAdapter, [columns: [:name]]}
     }
   }
