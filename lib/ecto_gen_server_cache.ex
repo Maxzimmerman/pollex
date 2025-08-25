@@ -1,37 +1,34 @@
 defmodule EctoGenServerCache do
-  use CacheAdapter.GenserverCacheAdapter
   use SrcAdapter.EctoAdapter
+  use CacheAdapter.GenserverCacheAdapter
 
-  @spec start_link(keyword()) :: :ignore | {:error, any()} | {:ok, pid()}
-  def start_link(opts) do
-    IO.puts("Called")
-    name = Keyword.fetch!(opts, :name)
-    GenServer.start_link(__MODULE__, opts, name: name)
-  end
-
-  @spec init(any()) :: {:ok, %{}}
+  @spec init(any()) :: {:ok, map()}
   @impl true
-  def init(_init_arg) do
-    lookup(:domain, "prefix")
-    refresh(:domain)
-    {:ok, %{}}
+  def init(opts) do
+    name = Keyword.fetch!(opts, :name)
+    table = Keyword.fetch!(opts, :source_opts)[:table]
+    interval = Keyword.fetch!(opts, :refresh_rate)
+    columns = Keyword.fetch!(opts, :cache_opts)[:columns]
+
+    data = GenServer.cast(name, {:update, load(table)})
+    {:ok, %{table: table, columns: columns, interval: interval, data: data}}
   end
 
+  # Genserver callback to get the data in the state
+  @impl true
+  def handle_call(:get, _from, state), do: {:reply, state.data, state}
+
+  # Genserver callback to set the data in the state
+  def handle_cast(:update, data, state) do
+    {:noreply, %{state | data: data}}
+  end
+
+  @doc """
+  Represents the public api to fetch the data
+  """
   @spec lookup(atom(), binary()) :: list(map())
   @impl true
   def lookup(_domain, _prefix) do
     [%{}]
-  end
-
-  @spec refresh(atom()) :: :ok
-  @impl true
-  def refresh(_domain) do
-    :ok
-  end
-
-  @spec schedule_refresh(integer()) :: any()
-  @impl true
-  def schedule_refresh(interval) do
-    Process.send_after(self(), :poll, interval)
   end
 end
