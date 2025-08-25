@@ -12,7 +12,8 @@ defmodule Pollex.MixProject do
       package: package(),
       name: "pollex",
       source_url: "https://github.com/Maxzimmerman/pollex",
-      docs: [main: "readme", extras: ["README.md"]]
+      docs: [main: "readme", extras: ["README.md"]],
+      aliases: aliases()
     ]
   end
 
@@ -28,7 +29,9 @@ defmodule Pollex.MixProject do
     [
       {:req, "~> 0.5.0"},
       {:mox, "~> 1.2.0", only: :test},
-      {:ex_doc, "~> 0.12"}
+      {:ex_doc, "~> 0.12"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -39,6 +42,12 @@ defmodule Pollex.MixProject do
       links: %{
         "GitHub" => "https://github.com/Maxzimmerman/pollex"
       }
+    ]
+  end
+
+  defp aliases do
+    [
+      check: ["format", "dialyzer", "test", "credo --strict"]
     ]
   end
 end
