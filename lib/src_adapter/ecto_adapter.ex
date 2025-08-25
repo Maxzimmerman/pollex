@@ -23,7 +23,8 @@ defmodule SrcAdapter.EctoAdapter do
       @impl true
       def load(table) do
         query =
-          from e in table
+          from e in table,
+            select: e.name
         IO.inspect(query)
         Repo.all(query)
       end

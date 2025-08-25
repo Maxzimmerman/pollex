@@ -4,8 +4,8 @@ config :pollex, Pollex.Application,
   datasets: %{
     unlocodes: %{
       refresh_interval_seconds: 60,
-      source: {EctoSourceAdapter, [table: "references_unlocodes"]},
-      cache: {GenServerCacheAdapter, [columns: [:code]]}
+      source: {EctoSourceAdapter, [table: "cities"]},
+      cache: {GenServerCacheAdapter, [columns: [:name]]}
     }
   }
 

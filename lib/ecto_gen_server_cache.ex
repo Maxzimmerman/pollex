@@ -10,8 +10,9 @@ defmodule EctoGenServerCache do
     interval = Keyword.fetch!(opts, :refresh_rate)
     columns = Keyword.fetch!(opts, :cache_opts)[:columns]
 
-    data = GenServer.cast(name, {:update, load(table)})
-    {:ok, %{table: table, columns: columns, interval: interval, data: data}}
+    data = load(table)
+    IO.inspect(data)
+    {:ok, %{table: table, columns: columns, interval: interval, name: name, data: data}}
   end
 
   # Genserver callback to get the data in the state
@@ -19,7 +20,8 @@ defmodule EctoGenServerCache do
   def handle_call(:get, _from, state), do: {:reply, state.data, state}
 
   # Genserver callback to set the data in the state
-  def handle_cast(:update, data, state) do
+  @impl true
+  def handle_cast({:update, data}, state) do
     {:noreply, %{state | data: data}}
   end
 
