@@ -10,6 +10,10 @@ defmodule CacheAdapter.GenserverCacheAdapter do
       use GenServer
       @behaviour CacheAdapter.GenserverCacheAdapter
 
+      @doc """
+      This is the first function called when the Genserver process is initialised
+      It configures a given name so we can have many Process of the same type
+      """
       @spec start_link(keyword()) :: :ignore | {:error, any()} | {:ok, pid()}
       def start_link(opts) do
         name = Keyword.fetch!(opts, :name)
@@ -24,7 +28,17 @@ defmodule CacheAdapter.GenserverCacheAdapter do
         raise "lookup/1 must be implemented"
       end
 
-      defoverridable lookup: 1
+      @doc """
+      Represents the loop
+      It sends the :poll message after a configured interval
+      """
+      @spec schedule_refresh(integer()) :: any()
+      @impl true
+      def schedule_refresh(interval) do
+        Process.send_after(self(), :poll, interval)
+      end
+
+      defoverridable lookup: 1, schedule_refresh: 1
     end
   end
 end

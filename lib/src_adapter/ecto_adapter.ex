@@ -18,19 +18,12 @@ defmodule SrcAdapter.EctoAdapter do
       """
       @spec load(Ecto.Schema.t(), module()) :: {:ok, list()}
       @impl true
-      # TODO table should be the schema module not a string
       def load(table, repo) do
         data = repo.all(table)
         {:ok, data}
       end
 
-      @spec schedule_refresh(integer()) :: any()
-      @impl true
-      def schedule_refresh(interval) do
-        Process.send_after(self(), :poll, interval)
-      end
-
-      defoverridable load: 2, schedule_refresh: 1
+      defoverridable load: 2
     end
   end
 end

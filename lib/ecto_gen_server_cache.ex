@@ -1,7 +1,35 @@
 defmodule EctoGenServerCache do
   @moduledoc """
-  This module acts as an cache for data pulled from a configured db
-  It holds methods to referesh the cache and it has functionality to the data up at any time
+  This module acts as a cache for data pulled from a configured database.
+  It holds methods to referesh the cache and has functionality to the data up at any time.
+
+  Example usage:
+
+  1. Configure the cache
+
+  config :pollex, Pollex.Application,
+  datasets: %{
+    cities: %{
+      refresh_interval_seconds: 6,
+      source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
+      cache: {GenServerCacheAdapter, [columns: [:name]]}
+    }
+  }
+
+  You configure a dataset, an interval, a table, repo and the columns you want to fetch.
+  The application will start a Genserver process per dataset and run for you.
+
+  2. Get the data
+
+    iex> EctoGenServerCache.lookup(:cities)
+    iex>
+    [
+      %{name: "germany"},
+      %{name: "usa"},
+      %{name: "australia"},
+      %{name: "united kingdom"},
+      %{name: "austria"}
+    ]
   """
   use SrcAdapter.EctoAdapter
   use CacheAdapter.GenserverCacheAdapter
@@ -56,7 +84,22 @@ defmodule EctoGenServerCache do
     {:noreply, %{state | data: data}}
   end
 
-  # Public api function which calls the Genserver callback to fetch the data
+  #
+  @doc """
+  Public api function which calls the Genserver callback to fetch the data
+
+    Example:
+
+    iex> EctoGenServerCache.lookup(:cities)
+    iex>
+    [
+      %{name: "germany"},
+      %{name: "usa"},
+      %{name: "australia"},
+      %{name: "united kingdom"},
+      %{name: "austria"}
+    ]
+  """
   @spec lookup(atom()) :: list(map())
   @impl true
   def lookup(name) do
