@@ -1,6 +1,5 @@
 defmodule EctoGenServerCacheTest do
   use ExUnit.Case, async: false
-  import ExUnit.CaptureLog
 
   alias Pollex.{Repo, City}
   alias EctoGenServerCache
@@ -38,10 +37,9 @@ defmodule EctoGenServerCacheTest do
   end
 
   test "initial state loads from DB", %{name: name} do
-      Process.sleep(100)
-      data = EctoGenServerCache.lookup(name)
-      IO.inspect(data)
-      assert Enum.any?(data, &(&1.name == "germany"))
-      assert Enum.any?(data, &(&1.name == "usa"))
+    Process.sleep(100)
+    data = EctoGenServerCache.lookup(name)
+    assert Enum.any?(data, &(&1.name == "germany"))
+    assert Enum.any?(data, &(&1.name == "usa"))
   end
 end

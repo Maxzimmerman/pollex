@@ -49,10 +49,6 @@ defmodule EctoGenServerCache do
 
     schedule_refresh(interval)
 
-    IO.puts("Initial")
-    IO.inspect(data)
-    IO.puts(data |> length)
-
     {:ok,
      %{table: table, repo: repo, columns: columns, interval: interval, name: name, data: data}}
   end
@@ -60,16 +56,16 @@ defmodule EctoGenServerCache do
   # Genserver callback to dynamicly update the state by calling the
   # handle cast genserver callback
   @impl true
-  def handle_info(:poll, %{table: table, columns: columns, repo: repo, name: name, interval: interval} = state) do
+  def handle_info(
+        :poll,
+        %{table: table, columns: columns, repo: repo, name: name, interval: interval} = state
+      ) do
     Task.start(fn ->
       case load(table, repo, columns) do
         {:ok, data} ->
           GenServer.cast(name, {:update, data})
       end
     end)
-
-    IO.inspect(state.data)
-    IO.puts(state.data |> length)
 
     schedule_refresh(interval)
     {:noreply, state}
@@ -88,6 +84,7 @@ defmodule EctoGenServerCache do
       existing_data
       |> Enum.concat(new_data)
       |> Enum.uniq_by(&Map.take(&1, columns))
+
     {:noreply, %{state | data: merged}}
   end
 

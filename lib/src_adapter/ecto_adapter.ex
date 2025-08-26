@@ -3,7 +3,8 @@ defmodule SrcAdapter.EctoAdapter do
   This module acts as the data provider it includes functions to
   initally get the data from the db and referesh it
   """
-  @callback load(table :: Ecto.Schema.t(), repo :: module(), columns :: list(atom())) :: {:ok, list()}
+  @callback load(table :: Ecto.Schema.t(), repo :: module(), columns :: list(atom())) ::
+              {:ok, list()}
   @callback schedule_refresh(interval :: integer()) :: any()
 
   @spec __using__(any()) :: any()
@@ -23,6 +24,7 @@ defmodule SrcAdapter.EctoAdapter do
           repo.all(table)
           |> Enum.map(&Map.take(&1, columns))
           |> Enum.uniq_by(& &1)
+
         {:ok, data}
       end
 
