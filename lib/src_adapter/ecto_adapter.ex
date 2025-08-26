@@ -3,8 +3,7 @@ defmodule SrcAdapter.EctoAdapter do
   This module acts as the data provider it includes functions to
   initally get the data from the db and referesh it
   """
-  alias Pollex.Repo
-  @callback load(table :: Ecto.Schema.t()) :: {:ok, list()}
+  @callback load(table :: Ecto.Schema.t(), repo :: module()) :: {:ok, list()}
   @callback schedule_refresh(interval :: integer()) :: any()
 
   @spec __using__(any()) :: any()
@@ -13,17 +12,15 @@ defmodule SrcAdapter.EctoAdapter do
       @behaviour SrcAdapter.EctoAdapter
       import Ecto.Query
 
-      alias Pollex.Repo
-
       @doc """
       Represents the initial data provider
       It calls the handle cast Genserver callback to save the data in the state
       """
-      @spec load(Ecto.Schema.t()) :: {:ok, list()}
+      @spec load(Ecto.Schema.t(), module()) :: {:ok, list()}
       @impl true
       # TODO table should be the schema module not a string
-      def load(table) do
-        data = Repo.all(table)
+      def load(table, repo) do
+        data = repo.all(table)
         {:ok, data}
       end
 
@@ -33,7 +30,7 @@ defmodule SrcAdapter.EctoAdapter do
         Process.send_after(self(), :poll, interval)
       end
 
-      defoverridable load: 1, schedule_refresh: 1
+      defoverridable load: 2, schedule_refresh: 1
     end
   end
 end
