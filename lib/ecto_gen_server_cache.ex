@@ -44,9 +44,14 @@ defmodule EctoGenServerCache do
     columns = Keyword.fetch!(opts, :cache_opts)[:columns]
 
     interval = :timer.seconds(interval)
-    data = load(table, repo)
+    # initially call the fetch the data
+    {:ok, data} = load(table, repo, columns)
 
     schedule_refresh(interval)
+
+    IO.puts("Initial")
+    IO.inspect(data)
+    IO.puts(data |> length)
 
     {:ok,
      %{table: table, repo: repo, columns: columns, interval: interval, name: name, data: data}}
@@ -55,13 +60,16 @@ defmodule EctoGenServerCache do
   # Genserver callback to dynamicly update the state by calling the
   # handle cast genserver callback
   @impl true
-  def handle_info(:poll, %{table: table, repo: repo, name: name, interval: interval} = state) do
+  def handle_info(:poll, %{table: table, columns: columns, repo: repo, name: name, interval: interval} = state) do
     Task.start(fn ->
-      case load(table, repo) do
+      case load(table, repo, columns) do
         {:ok, data} ->
           GenServer.cast(name, {:update, data})
       end
     end)
+
+    IO.inspect(state.data)
+    IO.puts(state.data |> length)
 
     schedule_refresh(interval)
     {:noreply, state}
@@ -69,19 +77,18 @@ defmodule EctoGenServerCache do
 
   # Genserver callback to get the data in the state
   @impl true
-  def handle_call(:get, _from, %{data: data, columns: columns} = state) do
-    data =
-      Enum.map(data, fn t ->
-        Map.take(t, columns)
-      end)
-
+  def handle_call(:get, _from, %{data: data} = state) do
     {:reply, data, state}
   end
 
   # Genserver callback to set the data in the state
   @impl true
-  def handle_cast({:update, data}, state) do
-    {:noreply, %{state | data: data}}
+  def handle_cast({:update, new_data}, %{data: existing_data, columns: columns} = state) do
+    merged =
+      existing_data
+      |> Enum.concat(new_data)
+      |> Enum.uniq_by(&Map.take(&1, columns))
+    {:noreply, %{state | data: merged}}
   end
 
   #

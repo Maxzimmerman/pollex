@@ -3,7 +3,7 @@ defmodule SrcAdapter.EctoAdapter do
   This module acts as the data provider it includes functions to
   initally get the data from the db and referesh it
   """
-  @callback load(table :: Ecto.Schema.t(), repo :: module()) :: {:ok, list()}
+  @callback load(table :: Ecto.Schema.t(), repo :: module(), columns :: list(atom())) :: {:ok, list()}
   @callback schedule_refresh(interval :: integer()) :: any()
 
   @spec __using__(any()) :: any()
@@ -16,14 +16,17 @@ defmodule SrcAdapter.EctoAdapter do
       Represents the initial data provider
       It calls the handle cast Genserver callback to save the data in the state
       """
-      @spec load(Ecto.Schema.t(), module()) :: {:ok, list()}
+      @spec load(Ecto.Schema.t(), module(), list(atom())) :: {:ok, list()}
       @impl true
-      def load(table, repo) do
-        data = repo.all(table)
+      def load(table, repo, columns) do
+        data =
+          repo.all(table)
+          |> Enum.map(&Map.take(&1, columns))
+          |> Enum.uniq_by(& &1)
         {:ok, data}
       end
 
-      defoverridable load: 2
+      defoverridable load: 3
     end
   end
 end
