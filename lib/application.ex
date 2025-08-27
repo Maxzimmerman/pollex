@@ -10,7 +10,7 @@ defmodule Pollex.Application do
     opts = [strategy: :one_for_one, name: Pollex.Supervisor]
     {:ok, sup_pid} = Supervisor.start_link(children, opts)
 
-    Task.start(fn -> init() end)
+    init()
 
     {:ok, sup_pid}
   end

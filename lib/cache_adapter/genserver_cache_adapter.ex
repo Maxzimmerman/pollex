@@ -4,7 +4,6 @@ defmodule CacheAdapter.GenserverCacheAdapter do
   """
   @callback lookup(name :: atom()) :: list(map())
 
-  @spec __using__(any()) :: any()
   defmacro __using__(_opts) do
     quote do
       use GenServer
