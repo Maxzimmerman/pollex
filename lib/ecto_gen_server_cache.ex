@@ -31,6 +31,7 @@ defmodule EctoGenServerCache do
       %{name: "austria"}
     ]
   """
+  require Logger
   use SrcAdapter.EctoAdapter
   use CacheAdapter.GenserverCacheAdapter
 
@@ -60,12 +61,17 @@ defmodule EctoGenServerCache do
         :poll,
         %{table: table, columns: columns, repo: repo, name: name, interval: interval} = state
       ) do
-    Task.start(fn ->
+    # Using the nolink so the Genserver crashes when the task crashed
+    # Then we use Task.ignor so we ingor the message if the task crashed we just log it
+    Task.Supervisor.async_nolink(Pollex.TaskSuperVisor ,fn ->
       case load(table, repo, columns) do
         {:ok, data} ->
           GenServer.cast(name, {:update, data})
+        {:error, reason} ->
+          Logger.error("Failed to load data: #{inspect(reason)}")
       end
     end)
+    |> Task.ignore()
 
     schedule_refresh(interval)
     {:noreply, state}

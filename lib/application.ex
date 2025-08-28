@@ -4,6 +4,7 @@ defmodule Pollex.Application do
   def start(_type, _args) do
     children = [
       {DynamicSupervisor, name: Pollex.DynamicSupervisor, strategy: :one_for_one},
+      {Task.Supervisor, name: Pollex.TaskSuperVisor},
       Pollex.Repo
     ]
 

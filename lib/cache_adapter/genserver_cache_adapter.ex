@@ -3,6 +3,7 @@ defmodule CacheAdapter.GenserverCacheAdapter do
   This module acts as the open api, you can look the data up and specify the columns you wanna get
   """
   @callback lookup(name :: atom()) :: list(map())
+  @callback schedule_refresh(interval :: integer()) :: any()
 
   defmacro __using__(_opts) do
     quote do
