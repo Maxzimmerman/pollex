@@ -10,13 +10,11 @@ defmodule Pollex.Application do
     opts = [strategy: :one_for_one, name: Pollex.Supervisor]
     {:ok, sup_pid} = Supervisor.start_link(children, opts)
 
-    init()
-
     {:ok, sup_pid}
   end
 
   @spec init() :: :ok
-  defp init do
+  def init do
     datasets = Application.get_env(:pollex, __MODULE__)[:datasets]
 
     Enum.each(datasets, fn dataset ->
