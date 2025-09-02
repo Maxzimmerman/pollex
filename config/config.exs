@@ -10,7 +10,7 @@ config :pollex, Pollex.Application,
   }
 
 config :pollex,
-  ecto_repos: [Pollex.Repo]
+  ecto_repos: [Mosaic.Repo]
 
 # Configure your database
 config :pollex, Pollex.Repo,

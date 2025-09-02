@@ -4,8 +4,7 @@ defmodule Pollex.Application do
   def start(_type, _args) do
     children = [
       {DynamicSupervisor, name: Pollex.DynamicSupervisor, strategy: :one_for_one},
-      {Task.Supervisor, name: Pollex.TaskSuperVisor},
-      Pollex.Repo
+      {Task.Supervisor, name: Pollex.TaskSuperVisor}
     ]
 
     opts = [strategy: :one_for_one, name: Pollex.Supervisor]
@@ -26,7 +25,6 @@ defmodule Pollex.Application do
       case [cache, source] do
         [{GenServerCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
           process_name = dataset_name
-          IO.puts(process_name)
 
           {:ok, _pid} =
             DynamicSupervisor.start_child(

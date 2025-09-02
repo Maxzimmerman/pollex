@@ -63,10 +63,11 @@ defmodule EctoGenServerCache do
       ) do
     # Using the nolink so the Genserver crashes when the task crashed
     # Then we use Task.ignor so we ingor the message if the task crashed we just log it
-    Task.Supervisor.async_nolink(Pollex.TaskSuperVisor ,fn ->
+    Task.Supervisor.async_nolink(Pollex.TaskSuperVisor, fn ->
       case load(table, repo, columns) do
         {:ok, data} ->
           GenServer.cast(name, {:update, data})
+
         {:error, reason} ->
           Logger.error("Failed to load data: #{inspect(reason)}")
       end

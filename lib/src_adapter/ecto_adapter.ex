@@ -24,6 +24,7 @@ defmodule SrcAdapter.EctoAdapter do
             repo.all(table)
             |> Enum.map(&Map.take(&1, columns))
             |> Enum.uniq_by(& &1)
+
           {:ok, data}
         rescue
           e -> {:error, e}
