@@ -7,29 +7,29 @@ defmodule EctoGenServerCache do
 
   1. Configure the cache
 
-  config :pollex, Pollex.Application,
-  datasets: %{
-    cities: %{
-      refresh_interval_seconds: 6,
-      source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
-      cache: {GenServerCacheAdapter, [columns: [:name]]}
-    }
-  }
+      config :pollex, Pollex.Application,
+        datasets: %{
+          cities: %{
+            refresh_interval_seconds: 6,
+            source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
+            cache: {GenServerCacheAdapter, [columns: [:name]]}
+          }
+      }
 
   You configure a dataset, an interval, a table, repo and the columns you want to fetch.
   The application will start a Genserver process per dataset and run for you.
 
   2. Get the data
 
-    iex> EctoGenServerCache.lookup(:cities)
-    iex>
-    [
-      %{name: "germany"},
-      %{name: "usa"},
-      %{name: "australia"},
-      %{name: "united kingdom"},
-      %{name: "austria"}
-    ]
+      iex> EctoGenServerCache.lookup(:cities)
+      iex>
+      [
+        %{name: "germany"},
+        %{name: "usa"},
+        %{name: "australia"},
+        %{name: "united kingdom"},
+        %{name: "austria"}
+      ]
   """
   require Logger
   use SrcAdapter.EctoAdapter
@@ -101,15 +101,15 @@ defmodule EctoGenServerCache do
 
     Example:
 
-    iex> EctoGenServerCache.lookup(:cities)
-    iex>
-    [
-      %{name: "germany"},
-      %{name: "usa"},
-      %{name: "australia"},
-      %{name: "united kingdom"},
-      %{name: "austria"}
-    ]
+      iex> EctoGenServerCache.lookup(:cities)
+      iex>
+      [
+        %{name: "germany"},
+        %{name: "usa"},
+        %{name: "australia"},
+        %{name: "united kingdom"},
+        %{name: "austria"}
+      ]
   """
   @spec lookup(atom()) :: list(map())
   @impl true
