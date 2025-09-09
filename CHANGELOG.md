@@ -21,3 +21,6 @@ So you define the dataset, an interval and which caching system you wanna use be
 
 ## [0.2.2] - 02.09.2025 
 - Provied a fix so the package won't crash now because the consuming package has to start it so it won't be started before the consuming Application repo
+
+## [0.2.3] - 03.09.2025
+- Updated the documentation
