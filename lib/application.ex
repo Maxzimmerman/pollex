@@ -4,12 +4,14 @@ defmodule Pollex.Application do
   def start(_type, _args) do
     children = [
       {DynamicSupervisor, name: Pollex.DynamicSupervisor, strategy: :one_for_one},
+      Pollex.Repo,
       {Task.Supervisor, name: Pollex.TaskSuperVisor}
     ]
 
     opts = [strategy: :one_for_one, name: Pollex.Supervisor]
     {:ok, sup_pid} = Supervisor.start_link(children, opts)
-
+    init()
+    start_alphabetic_system()
     {:ok, sup_pid}
   end
 
@@ -37,5 +39,37 @@ defmodule Pollex.Application do
             )
       end
     end)
+  end
+
+  def start_alphabetic_system do
+    names = for name <- ?a..?z, do: <<name>>
+
+    case Application.get_env(:pollex_alpha, __MODULE__) do
+      opts ->
+        %{refresh_interval_seconds: rate, source: source, cache: cache} = opts[:opts]
+
+        Enum.each(names, fn name ->
+          case [cache, source] do
+            [{GenServerCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
+              {:ok, pid} =
+                DynamicSupervisor.start_child(
+                  Pollex.DynamicSupervisor,
+                  {EctoGenServerCache,
+                   [
+                     name: String.to_atom(name),
+                     cache_opts: cache_opts,
+                     source_opts: source_opts,
+                     refresh_rate: rate
+                   ]}
+                )
+
+              IO.inspect(pid)
+              IO.puts("Worked")
+          end
+        end)
+
+      nil ->
+        IO.puts("Not configured")
+    end
   end
 end

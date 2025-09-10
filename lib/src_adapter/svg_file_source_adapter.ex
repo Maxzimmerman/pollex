@@ -12,6 +12,7 @@ defmodule SrcAdapter.SvgFileSourceAdapter do
           end
         end
       end
+
       defoverridable load: 1
     end
   end
