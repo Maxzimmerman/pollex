@@ -9,10 +9,7 @@ defmodule Pollex.Application do
     ]
 
     opts = [strategy: :one_for_one, name: Pollex.Supervisor]
-    {:ok, sup_pid} = Supervisor.start_link(children, opts)
-    init()
-    start_alphabetic_system()
-    {:ok, sup_pid}
+    Supervisor.start_link(children, opts)
   end
 
   @spec init() :: :ok
