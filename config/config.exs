@@ -22,9 +22,9 @@ config :pollex, Pollex.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
-config :pollex_alpha, Pollex.Application,
+config :pollex, Pollex.Application,
   opts: %{
     refresh_interval_seconds: 3,
-    source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
+    source: {AlphabeticCacheAdapter, [table: Pollex.City, repo: Pollex.Repo]},
     cache: {GenServerCacheAdapter, [columns: [:name]]}
   }

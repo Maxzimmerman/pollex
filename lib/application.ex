@@ -44,17 +44,17 @@ defmodule Pollex.Application do
   def start_alphabetic_system do
     names = for name <- ?a..?z, do: <<name>>
 
-    case Application.get_env(:pollex_alpha, __MODULE__) do
+    case Application.get_env(:pollex, __MODULE__) do
       opts ->
         %{refresh_interval_seconds: rate, source: source, cache: cache} = opts[:opts]
 
         Enum.each(names, fn name ->
           case [cache, source] do
-            [{GenServerCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
+            [{GenServerCacheAdapter, cache_opts}, {AlphabeticCacheAdapter, source_opts}] ->
               {:ok, pid} =
                 DynamicSupervisor.start_child(
                   Pollex.DynamicSupervisor,
-                  {EctoGenServerCache,
+                  {AlphabeticCache,
                    [
                      name: String.to_atom(name),
                      cache_opts: cache_opts,
@@ -62,14 +62,8 @@ defmodule Pollex.Application do
                      refresh_rate: rate
                    ]}
                 )
-
-              IO.inspect(pid)
-              IO.puts("Worked")
           end
         end)
-
-      nil ->
-        IO.puts("Not configured")
     end
   end
 end
