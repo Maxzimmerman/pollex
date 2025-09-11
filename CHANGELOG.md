@@ -47,3 +47,6 @@ You can then fetch the entries matching the letter like this
         %{name: "australia"},
         %{name: "austria"}
       ]
+
+## [0.3.4] - 11.09.2025
+- Fixed dynamic Repo selection
