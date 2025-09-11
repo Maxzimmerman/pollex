@@ -95,7 +95,6 @@ defmodule EctoGenServerCache do
     {:noreply, %{state | data: merged}}
   end
 
-  #
   @doc """
   Public api function which calls the Genserver callback to fetch the data
 

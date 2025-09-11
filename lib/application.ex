@@ -51,7 +51,7 @@ defmodule Pollex.Application do
         Enum.each(names, fn name ->
           case [cache, source] do
             [{GenServerCacheAdapter, cache_opts}, {AlphabeticCacheAdapter, source_opts}] ->
-              {:ok, pid} =
+              {:ok, _pid} =
                 DynamicSupervisor.start_child(
                   Pollex.DynamicSupervisor,
                   {AlphabeticCache,
