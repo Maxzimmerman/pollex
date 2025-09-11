@@ -12,7 +12,7 @@ defmodule AlphabeticCache do
           refresh_interval_seconds: 3,
           source: {AlphabeticCacheAdapter, [table: Pollex.City, repo: Pollex.Repo]},
           cache: {GenServerCacheAdapter, [columns: [:name]]}
-        }
+      }
 
   You configure a dataset, an interval, a table, repo and the columns you want to fetch.
   The application will start a Genserver process per letter in the alphabet holding the data starting with that letter and run for you.
