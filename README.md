@@ -34,6 +34,10 @@ Configurable Cache System
 
 The cache system lets you declare datasets in your config. Each dataset will start its own supervised GenServer, which fetches data from a configured source (such as an Ecto Repo) and keeps it cached in memory.
 
+There are also some introduction videos showing how to use this package
+Ecto/GenServer
+https://www.loom.com/share/ccc4e382d5734f5897ed346b0da21323
+
 # config/config.exs
 
 ```elixir
@@ -65,6 +69,8 @@ iex> EctoGenServerCache.lookup(:cities)
   %{name: "austria"}
 ]
 ```
+
+There are more options you can find in the Docs 👇
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can

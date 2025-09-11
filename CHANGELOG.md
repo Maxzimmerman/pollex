@@ -24,3 +24,26 @@ So you define the dataset, an interval and which caching system you wanna use be
 
 ## [0.2.3] - 03.09.2025
 - Updated the documentation
+
+## [0.3.3] - 11.09.2025
+- Added a new ecto/genserver caching system configurable in the config
+- You configure one one cache strategy and the system will spawn a genserver for each letter in the alphabet, so 24. Each Genserver fetches entries with the name field starting with the letter
+- The genservers will automatically run under you supervisor tree managed by a Dynamic Supervisor
+
+Example:
+ 
+ config :pollex, Pollex.Application,
+  opts: %{
+    refresh_interval_seconds: 3,
+    source: {AlphabeticCacheAdapter, [table: Pollex.City, repo: Pollex.Repo]},
+    cache: {GenServerCacheAdapter, [columns: [:name]]}
+  }
+
+You can then fetch the entries matching the letter like this
+
+  iex> AlphabeticCache.lookup(:a)
+      iex>
+      [
+        %{name: "australia"},
+        %{name: "austria"}
+      ]
