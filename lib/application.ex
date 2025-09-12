@@ -8,7 +8,10 @@ defmodule Pollex.Application do
     ]
 
     opts = [strategy: :one_for_one, name: Pollex.Supervisor]
-    Supervisor.start_link(children, opts)
+
+    {:ok, pid} = Supervisor.start_link(children, opts)
+
+    {:ok, pid}
   end
 
   @spec init() :: :ok
@@ -30,6 +33,19 @@ defmodule Pollex.Application do
                  name: process_name,
                  cache_opts: cache_opts,
                  source_opts: source_opts,
+                 refresh_rate: rate
+               ]}
+            )
+
+        [{GenServerCacheAdapter, _cache_opts}, {CSVFileSourceAdapter, _source_opts}] ->
+          process_name = dataset_name
+
+          {:ok, _pid} =
+            DynamicSupervisor.start_child(
+              Pollex.DynamicSupervisor,
+              {CSVGenServerCache,
+               [
+                 name: process_name,
                  refresh_rate: rate
                ]}
             )

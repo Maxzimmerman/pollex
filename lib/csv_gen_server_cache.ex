@@ -43,7 +43,7 @@ defmodule CSVGenServerCache do
     interval = Keyword.fetch!(opts, :refresh_rate)
 
     interval = :timer.seconds(interval)
-    {:ok, data} = load(Kernel.to_string(name))
+    {:ok, data} = load(Kernel.to_string(name) <> ".csv")
 
     schedule_refresh(interval)
 
@@ -52,8 +52,8 @@ defmodule CSVGenServerCache do
 
   @impl true
   def handle_info(:poll, %{name: name, interval: interval} = state) do
-    Task.Supervisor.async_nolink(Pollex.TaskSupervisor, fn ->
-      case load(Kernel.to_string(name)) do
+    Task.Supervisor.async_nolink(Pollex.TaskSuperVisor, fn ->
+      case load(Kernel.to_string(name) <> ".csv") do
         {:ok, data} ->
           GenServer.cast(name, {:update, data})
 
