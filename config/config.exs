@@ -1,14 +1,5 @@
 import Config
 
-config :pollex, Pollex.Application,
-  datasets: %{
-    cities: %{
-      refresh_interval_seconds: 3,
-      source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
-      cache: {GenServerCacheAdapter, [columns: [:name]]}
-    }
-  }
-
 config :pollex,
   ecto_repos: [Mosaic.Repo]
 
