@@ -4,7 +4,7 @@ defmodule Pollex.MixProject do
   def project do
     [
       app: :pollex,
-      version: "0.3.4",
+      version: "0.4.4",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
