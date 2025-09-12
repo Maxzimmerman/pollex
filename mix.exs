@@ -35,7 +35,7 @@ defmodule Pollex.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
-      {:csv, "~> 3.2"},
+      {:csv, "~> 3.2"}
     ]
   end
 
