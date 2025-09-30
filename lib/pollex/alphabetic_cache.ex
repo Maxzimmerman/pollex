@@ -1,4 +1,4 @@
-defmodule AlphabeticCache do
+defmodule Pollex.AlphabeticCache do
   @moduledoc """
   This module acts as a cache for data pulled from a configured database.
   It holds methods to referesh the cache and has functionality to the data up at any time.
@@ -28,8 +28,8 @@ defmodule AlphabeticCache do
   """
 
   require Logger
-  use SrcAdapter.AlphabeticAdapter
-  use CacheAdapter.GenserverCacheAdapter
+  use Pollex.SrcAdapter.AlphabeticAdapter
+  use Pollex.CacheAdapter.GenserverCacheAdapter
 
   @spec init(any()) :: {:ok, map()}
   @impl true

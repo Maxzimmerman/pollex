@@ -1,15 +1,17 @@
-defmodule SrcAdapter.CSVFileSourceAdapter do
+defmodule Pollex.SrcAdapter.CSVFileSourceAdapter do
+  alias Pollex.SrcAdapter.CSVFileSourceAdapter
+
   @callback load(String.t()) :: {:ok, list()} | {:error, any()}
 
   defmacro __using__(_opts) do
     quote do
-      @behaviour SrcAdapter.CSVFileSourceAdapter
+      @behaviour CSVFileSourceAdapter
 
       @spec load(String.t()) :: {:ok, list()} | {:error, any()}
       def load(file_name) do
-        file_path = Path.join(unquote(SrcAdapter.CSVFileSourceAdapter.seed_path()), file_name)
+        file_path = Path.join(unquote(CSVFileSourceAdapter.seed_path()), file_name)
 
-        case SrcAdapter.CSVFileSourceAdapter.read_csv(file_path) do
+        case CSVFileSourceAdapter.read_csv(file_path) do
           {:ok, content} -> {:ok, content}
           {:error, reason} -> {:error, reason}
         end

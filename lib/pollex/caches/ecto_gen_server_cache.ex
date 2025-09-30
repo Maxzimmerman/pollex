@@ -1,4 +1,4 @@
-defmodule EctoGenServerCache do
+defmodule Pollex.EctoGenServerCache do
   @moduledoc """
   This module acts as a cache for data pulled from a configured database.
   It holds methods to referesh the cache and has functionality to the data up at any time.
@@ -32,8 +32,8 @@ defmodule EctoGenServerCache do
       ]
   """
   require Logger
-  use SrcAdapter.EctoAdapter
-  use CacheAdapter.GenserverCacheAdapter
+  use Pollex.SrcAdapter.EctoAdapter
+  use Pollex.CacheAdapter.GenserverCacheAdapter
 
   @spec init(any()) :: {:ok, map()}
   @impl true
