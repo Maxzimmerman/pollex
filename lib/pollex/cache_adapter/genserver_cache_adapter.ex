@@ -1,4 +1,6 @@
-defmodule CacheAdapter.GenserverCacheAdapter do
+defmodule Pollex.CacheAdapter.GenserverCacheAdapter do
+  alias Pollex.CacheAdapter.GenserverCacheAdapter
+
   @moduledoc """
   This module acts as the open api, you can look the data up and specify the columns you wanna get
   """
@@ -8,7 +10,7 @@ defmodule CacheAdapter.GenserverCacheAdapter do
   defmacro __using__(_opts) do
     quote do
       use GenServer
-      @behaviour CacheAdapter.GenserverCacheAdapter
+      @behaviour GenserverCacheAdapter
 
       @doc """
       This is the first function called when the Genserver process is initialised

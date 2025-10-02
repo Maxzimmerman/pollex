@@ -12,8 +12,29 @@ defmodule Pollex.MixProject do
       package: package(),
       name: "pollex",
       source_url: "https://github.com/Maxzimmerman/pollex",
-      docs: [main: "readme", extras: ["README.md"]],
+      docs: docs(),
       aliases: aliases()
+    ]
+  end
+
+  def docs do
+    [
+      main: "readme",
+      extras: [
+        "README.md": [title: "Overview"],
+        "guides/caches/GETTING_STARTED.md": [title: "Getting Started"],
+        "guides/caches/ECTOGENSERVERCACHE.md": [title: "EctoGenServerCache"],
+        "guides/caches/CSVGENSERVERCACHE.md": [title: "CSVGenServerCache"],
+        "guides/caches/ALPHABETICCACHE.md": [title: "AlphabeticCache"]
+      ],
+      groups_for_extras: [
+        Tutorials: [
+          "guides/caches/GETTING_STARTED.md",
+          "guides/caches/ECTOGENSERVERCACHE.md",
+          "guides/caches/CSVGENSERVERCACHE.md",
+          "guides/caches/ALPHABETICCACHE.md"
+        ]
+      ]
     ]
   end
 
