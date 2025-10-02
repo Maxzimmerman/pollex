@@ -19,10 +19,18 @@ defmodule Pollex.SrcAdapter.CSVFileSourceAdapter do
     end
   end
 
+  @doc """
+  This functions returns the path to the where the csvs live
+  """
+  @spec seed_path() :: Path.t()
   def seed_path do
     Path.expand("csvs/", File.cwd!())
   end
 
+  @doc """
+  This function reads a csv file of a given path and transforms the input to a elixir map
+  """
+  @spec read_csv(String.t()) :: {:ok, Enum.t()} | {:error, Exception.t() | {term(), term()}}
   def read_csv(file_path) do
     try do
       {:ok,

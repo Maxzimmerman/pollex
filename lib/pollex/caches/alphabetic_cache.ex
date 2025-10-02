@@ -10,8 +10,8 @@ defmodule Pollex.AlphabeticCache do
       config :pollex, Pollex.Application,
         opts: %{
           refresh_interval_seconds: 3,
-          source: {AlphabeticCacheAdapter, [table: Pollex.City, repo: Pollex.Repo]},
-          cache: {GenServerCacheAdapter, [columns: [:name]]}
+          source: {GenServerCacheAdapter, [columns: [:name]]}
+          cache: {AlphabeticCacheAdapter, [table: Pollex.City, repo: Pollex.Repo]},
       }
 
   You configure a dataset, an interval, a table, repo and the columns you want to fetch.
