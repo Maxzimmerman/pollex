@@ -1,4 +1,4 @@
-defmodule CSVGenServerCache do
+defmodule Pollex.CSVGenServerCache do
   @moduledoc """
   This module acts as a cache for data pulled from a configured file.
   It holds methods to referesh the cache and has functionality to the data up at any time.
@@ -33,8 +33,8 @@ defmodule CSVGenServerCache do
   """
 
   require Logger
-  use SrcAdapter.CSVFileSourceAdapter
-  use CacheAdapter.GenserverCacheAdapter
+  use Pollex.SrcAdapter.CSVFileSourceAdapter
+  use Pollex.CacheAdapter.GenserverCacheAdapter
 
   @spec init(any()) :: {:ok, map()}
   @impl true

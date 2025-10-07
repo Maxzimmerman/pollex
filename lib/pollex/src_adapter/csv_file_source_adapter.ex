@@ -1,15 +1,17 @@
-defmodule SrcAdapter.CSVFileSourceAdapter do
+defmodule Pollex.SrcAdapter.CSVFileSourceAdapter do
+  alias Pollex.SrcAdapter.CSVFileSourceAdapter
+
   @callback load(String.t()) :: {:ok, list()} | {:error, any()}
 
   defmacro __using__(_opts) do
     quote do
-      @behaviour SrcAdapter.CSVFileSourceAdapter
+      @behaviour Pollex.SrcAdapter.CSVFileSourceAdapter
 
       @spec load(String.t()) :: {:ok, list()} | {:error, any()}
       def load(file_name) do
-        file_path = Path.join(unquote(SrcAdapter.CSVFileSourceAdapter.seed_path()), file_name)
+        file_path = Path.join(unquote(CSVFileSourceAdapter.seed_path()), file_name)
 
-        case SrcAdapter.CSVFileSourceAdapter.read_csv(file_path) do
+        case CSVFileSourceAdapter.read_csv(file_path) do
           {:ok, content} -> {:ok, content}
           {:error, reason} -> {:error, reason}
         end
@@ -17,10 +19,18 @@ defmodule SrcAdapter.CSVFileSourceAdapter do
     end
   end
 
+  @doc """
+  This functions returns the path to the where the csvs live
+  """
+  @spec seed_path() :: Path.t()
   def seed_path do
     Path.expand("csvs/", File.cwd!())
   end
 
+  @doc """
+  This function reads a csv file of a given path and transforms the input to a elixir map
+  """
+  @spec read_csv(String.t()) :: {:ok, Enum.t()} | {:error, Exception.t()}
   def read_csv(file_path) do
     try do
       {:ok,

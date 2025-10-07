@@ -1,4 +1,4 @@
-defmodule SrcAdapter.AlphabeticAdapter do
+defmodule Pollex.SrcAdapter.AlphabeticAdapter do
   @callback load(
               table :: Ecto.Schema.t(),
               repo :: module(),
@@ -9,7 +9,7 @@ defmodule SrcAdapter.AlphabeticAdapter do
   @spec __using__(any()) :: any()
   defmacro __using__(_opts) do
     quote do
-      @behaviour SrcAdapter.AlphabeticAdapter
+      @behaviour Pollex.SrcAdapter.AlphabeticAdapter
       import Ecto.Query
 
       @spec load(Ecto.Schema.t(), module(), list(), binary()) ::

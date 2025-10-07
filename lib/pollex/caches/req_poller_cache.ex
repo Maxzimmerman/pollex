@@ -1,4 +1,4 @@
-defmodule ReqPollerCache do
+defmodule Pollex.ReqPollerCache do
   @moduledoc """
     Provides methods for fetching and recieving data.
     To use it just add the following to your applicaion.ex it needs three inputs: request, interval and name
