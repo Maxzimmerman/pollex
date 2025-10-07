@@ -5,7 +5,7 @@ defmodule Pollex.SrcAdapter.CSVFileSourceAdapter do
 
   defmacro __using__(_opts) do
     quote do
-      @behaviour CSVFileSourceAdapter
+      @behaviour Pollex.SrcAdapter.CSVFileSourceAdapter
 
       @spec load(String.t()) :: {:ok, list()} | {:error, any()}
       def load(file_name) do
@@ -30,7 +30,7 @@ defmodule Pollex.SrcAdapter.CSVFileSourceAdapter do
   @doc """
   This function reads a csv file of a given path and transforms the input to a elixir map
   """
-  @spec read_csv(String.t()) :: {:ok, Enum.t()} | {:error, Exception.t() | {term(), term()}}
+  @spec read_csv(String.t()) :: {:ok, Enum.t()} | {:error, Exception.t()}
   def read_csv(file_path) do
     try do
       {:ok,

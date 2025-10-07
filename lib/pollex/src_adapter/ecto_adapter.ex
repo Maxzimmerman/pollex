@@ -1,6 +1,4 @@
 defmodule Pollex.SrcAdapter.EctoAdapter do
-  alias Pollex.SrcAdapter.EctoAdapter
-
   @moduledoc """
   This module acts as the data provider it includes functions to
   initally get the data from the db and referesh it
@@ -11,7 +9,7 @@ defmodule Pollex.SrcAdapter.EctoAdapter do
   @spec __using__(any()) :: any()
   defmacro __using__(_opts) do
     quote do
-      @behaviour EctoAdapter
+      @behaviour Pollex.SrcAdapter.EctoAdapter
       import Ecto.Query
 
       @doc """
