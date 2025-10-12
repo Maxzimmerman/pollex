@@ -54,3 +54,6 @@ You can then fetch the entries matching the letter like this
 
 ## [0.4.4] - 12.09.2025
 - Added Cache which reads from a given file
+
+## [0.4.3] - 07.10.2025
+- Added dedicated tutorials for each cache
