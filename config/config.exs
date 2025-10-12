@@ -12,10 +12,3 @@ config :pollex, Pollex.Repo,
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
-
-config :pollex, Pollex.Application,
-  opts: %{
-    refresh_interval_seconds: 3,
-    source: {AlphabeticCacheAdapter, [table: Pollex.City, repo: Pollex.Repo]},
-    cache: {GenServerCacheAdapter, [columns: [:name]]}
-  }
