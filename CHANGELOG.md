@@ -55,5 +55,9 @@ You can then fetch the entries matching the letter like this
 ## [0.4.4] - 12.09.2025
 - Added Cache which reads from a given file
 
-## [0.4.3] - 07.10.2025
+## [0.4.5] - 07.10.2025
 - Added dedicated tutorials for each cache
+
+## [0.4.6] - 13.10.2025
+- Made using the package easier since you now don't have to start the caches yourselfes
+- Alidned the config for the alphabetic cache with Ecto-GenServer cache
