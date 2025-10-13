@@ -2,9 +2,12 @@ defmodule EctoGenServerCacheTest do
   use ExUnit.Case, async: false
 
   alias Pollex.{Repo, City}
-  alias EctoGenServerCache
+  alias Pollex.EctoGenServerCache
 
   setup do
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
+    Ecto.Adapters.SQL.Sandbox.mode(Repo, {:shared, self()})
+
     # Insert some test data
     Repo.insert!(%City{name: "germany"})
     Repo.insert!(%City{name: "usa"})

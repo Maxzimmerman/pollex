@@ -3,6 +3,8 @@ defmodule PllEngineTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureLog
 
+  alias Pollex.ReqPollerCache
+
   setup do
     name = :"poller_test_#{System.unique_integer()}"
     interval = 1

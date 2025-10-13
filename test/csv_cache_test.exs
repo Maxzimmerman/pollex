@@ -1,5 +1,7 @@
-defmodule CSVGenServerCacheTEst do
+defmodule CSVGenServerCacheTest do
   use ExUnit.Case, async: false
+
+  alias Pollex.CSVGenServerCache
 
   setup do
     name = :countries
