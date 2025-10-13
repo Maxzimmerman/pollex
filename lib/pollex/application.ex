@@ -1,11 +1,12 @@
 defmodule Pollex.Application do
   require Logger
-  alias Pollex.SrcAdapter.AlphabeticAdapter
+
   use Application
 
   def start(_type, _args) do
     children = [
       {DynamicSupervisor, name: Pollex.DynamicSupervisor, strategy: :one_for_one},
+      Pollex.Repo,
       {Task.Supervisor, name: Pollex.TaskSuperVisor}
     ]
 
@@ -37,7 +38,7 @@ defmodule Pollex.Application do
               {:ok, _pid} =
                 DynamicSupervisor.start_child(
                   Pollex.DynamicSupervisor,
-                  {EctoGenServerCache,
+                  {Pollex.EctoGenServerCache,
                    [
                      name: process_name,
                      cache_opts: cache_opts,
@@ -52,21 +53,21 @@ defmodule Pollex.Application do
               {:ok, _pid} =
                 DynamicSupervisor.start_child(
                   Pollex.DynamicSupervisor,
-                  {CSVGenServerCache,
+                  {Pollex.CSVGenServerCache,
                    [
                      name: process_name,
                      refresh_rate: rate
                    ]}
                 )
 
-            [{AlphabeticAdapter, cache_opts}, {GenServerCacheAdapter, source_opts}] ->
+            [{AlphabeticAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
               names = for name <- ?a..?z, do: <<name>>
 
               Enum.each(names, fn name ->
                 {:ok, _pid} =
                   DynamicSupervisor.start_child(
                     Pollex.DynamicSupervisor,
-                    {AlphabeticCache,
+                    {Pollex.AlphabeticCache,
                      [
                        name: String.to_atom(name),
                        cache_opts: cache_opts,

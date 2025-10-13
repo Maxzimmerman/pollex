@@ -13,9 +13,9 @@ In there you can define your csv data and you are good to go
 config :pollex, Pollex.Application,
     csvs: %{
         countries: %{
-        refresh_interval_seconds: 3,
-        source: {CSVFileSourceAdapter, []},
-        cache: {GenServerCacheAdapter, []}
+            refresh_interval_seconds: 3,
+            source: {CSVFileSourceAdapter, []},
+            cache: {GenServerCacheAdapter, []}
         }
 }
 ```
@@ -29,7 +29,7 @@ cache → defines how the data is stored in the GenServer (e.g., which columns t
 Once the cache is running, you can fetch data at any time
 
 ```elixir
-iex> EctoGenServerCache.lookup(:cities)
+iex> CSVGenServerCache.lookup(:cities)
 iex>
 [
     %{name: "germany"},

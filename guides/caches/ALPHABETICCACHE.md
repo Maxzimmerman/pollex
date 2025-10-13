@@ -6,9 +6,9 @@ This cache follows a different approach. The idea you configure a data set you w
 
 ```elixir
 config :pollex, Pollex.Application,
-    opts: %{
-        refresh_interval_seconds: 3,
-        source: {AlphabeticCacheAdapter, [table: Pollex.City, repo: Pollex.Repo]},
+    citiess: %{
+        refresh_interval_seconds: 6,
+        source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
         cache: {GenServerCacheAdapter, [columns: [:name]]}
     }
 ```
