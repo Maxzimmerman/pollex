@@ -7,6 +7,5 @@ config :pollex, Pollex.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "pollex_test",
-  pool: Ecto.Adapters.SQL.Sandbox,
+  database: "pollex_dev",
   pool_size: 10

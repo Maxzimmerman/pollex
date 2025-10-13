@@ -72,7 +72,8 @@ defmodule Pollex.MixProject do
 
   defp aliases do
     [
-      check: ["format", "dialyzer", "test", "credo --strict"]
+      check: ["format", "dialyzer", "test", "credo --strict"],
+      "ecto.setup": ["ecto.create", "ecto.migrate"]
     ]
   end
 end
