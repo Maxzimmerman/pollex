@@ -67,3 +67,6 @@ You can then fetch the entries matching the letter like this
 
 ## [0.4.8] - 20.10.2025
 - Removed some debugging lines.
+
+## [0.4.9] - 20.10.2025
+- Made the dataset initializer retry.
