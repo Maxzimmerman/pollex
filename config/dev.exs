@@ -21,12 +21,12 @@ config :pollex, Pollex.Application,
       refresh_interval_seconds: 6,
       source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
       cache: {GenServerCacheAdapter, [columns: [:name]]}
-    },
+    }
   },
   csvs: %{
-        countries: %{
-            refresh_interval_seconds: 3,
-            source: {CSVFileSourceAdapter, []},
-            cache: {GenServerCacheAdapter, []}
-        }
-      }
+    countries: %{
+      refresh_interval_seconds: 3,
+      source: {CSVFileSourceAdapter, []},
+      cache: {GenServerCacheAdapter, []}
+    }
+  }

@@ -6,11 +6,13 @@ This cache follows a different approach. The idea you configure a data set you w
 
 ```elixir
 config :pollex, Pollex.Application,
-    citiess: %{
-        refresh_interval_seconds: 6,
-        source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
-        cache: {GenServerCacheAdapter, [columns: [:name]]}
+  datasets: %{
+    unlocodes: %{
+      refresh_interval_seconds: 6,
+      cache: {AlphabeticAdapter, [columns: [:name]]},
+      source: {EctoSourceAdapter, [table: Mosaic.City, repo: Pollex.Repo]}
     }
+  }
 ```
 
 refresh_interval_seconds → how often the cache refreshes
