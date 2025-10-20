@@ -23,7 +23,7 @@ by adding `pollex` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:pollex, "~> 0.4.4"}
+    {:pollex, "~> 0.4.7"}
   ]
 end
 ```

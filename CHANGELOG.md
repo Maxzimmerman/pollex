@@ -61,3 +61,6 @@ You can then fetch the entries matching the letter like this
 ## [0.4.6] - 13.10.2025
 - Made using the package easier since you now don't have to start the caches yourselfes
 - Alidned the config for the alphabetic cache with Ecto-GenServer cache
+
+## [0.4.7] - 20.10.2025
+- Created a initialize dataset module which checks if the consumer provided a repo.
