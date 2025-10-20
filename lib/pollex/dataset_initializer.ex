@@ -2,92 +2,95 @@ defmodule Pollex.DatasetInitializer do
   use GenServer
   require Logger
 
-  @delay_ms 2_000
+  @retry_ms 2_000
 
-  def start_link(_arge) do
+  def start_link(_args) do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
   @impl true
   def init(state) do
-    Process.send_after(self(), :init_datasets, @delay_ms)
+    Process.send_after(self(), :init_datasets, @retry_ms)
     {:ok, state}
   end
 
   @impl true
-  @spec handle_info(:init_datasets, any()) :: {:noreply, any()}
   def handle_info(:init_datasets, state) do
-    datasets = Application.get_env(:pollex, Pollex.Application)[:datasets]
+    case Application.get_env(:pollex, Pollex.Application) do
+      nil ->
+        Logger.info("[Pollex] No :pollex, Pollex.Application config found — retrying...")
+        schedule_retry()
+        {:noreply, state}
 
-    if is_nil(datasets) do
-      Logger.info("[Pollex] No datasets configured.")
-      {:noreply, state}
-    else
-      init()
-      {:noreply, state}
+      %{datasets: datasets} when map_size(datasets) > 0 ->
+        case repo_ready?(datasets) do
+          true ->
+            Logger.info("[Pollex] Starting datasets...")
+            start_datasets(datasets)
+            {:noreply, state}
+
+          false ->
+            Logger.info("[Pollex] Repo not ready — retrying in #{@retry_ms}ms")
+            schedule_retry()
+            {:noreply, state}
+        end
+
+      _ ->
+        Logger.info("[Pollex] No datasets configured.")
+        {:noreply, state}
     end
   end
 
-  @spec init() :: :ok
-  defp init do
-    datasets = Application.get_env(:pollex, Pollex.Application)[:datasets]
+  defp schedule_retry, do: Process.send_after(self(), :init_datasets, @retry_ms)
 
-    case datasets do
-      nil ->
-        Logger.info("Nothing to start")
+  defp repo_ready?(datasets) do
+    Enum.all?(datasets, fn {_name, %{source: {_adapter, opts}}} ->
+      case Keyword.get(opts, :repo) do
+        nil -> true
+        repo -> Code.ensure_loaded?(repo) and Process.whereis(repo) != nil
+      end
+    end)
+  end
 
-      datasets ->
-        Enum.each(datasets, fn dataset ->
-          {dataset_name, %{cache: cache, source: source, refresh_interval_seconds: rate}} =
-            dataset
+  defp start_datasets(datasets) do
+    Enum.each(datasets, fn {dataset_name, %{cache: cache, source: source, refresh_interval_seconds: rate}} ->
+      case [cache, source] do
+        [{GenServerCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
+          DynamicSupervisor.start_child(
+            Pollex.DynamicSupervisor,
+            {Pollex.EctoGenServerCache,
+             [
+               name: dataset_name,
+               cache_opts: cache_opts,
+               source_opts: source_opts,
+               refresh_rate: rate
+             ]}
+          )
 
-          case [cache, source] do
-            [{GenServerCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
-              process_name = dataset_name
-
-              {:ok, _pid} =
-                DynamicSupervisor.start_child(
-                  Pollex.DynamicSupervisor,
-                  {Pollex.EctoGenServerCache,
-                   [
-                     name: process_name,
-                     cache_opts: cache_opts,
-                     source_opts: source_opts,
-                     refresh_rate: rate
-                   ]}
-                )
-
-            [{GenServerCacheAdapter, _cache_opts}, {CSVFileSourceAdapter, _source_opts}] ->
-              process_name = dataset_name
-
-              {:ok, _pid} =
-                DynamicSupervisor.start_child(
-                  Pollex.DynamicSupervisor,
-                  {Pollex.CSVGenServerCache,
-                   [
-                     name: process_name,
-                     refresh_rate: rate
-                   ]}
-                )
-
-            [{AlphabeticAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
-              names = for name <- ?a..?z, do: <<name>>
-
-              Enum.each(names, fn name ->
-                {:ok, _pid} =
-                  DynamicSupervisor.start_child(
-                    Pollex.DynamicSupervisor,
-                    {Pollex.AlphabeticCache,
-                     [
-                       name: String.to_atom(name),
-                       cache_opts: cache_opts,
-                       source_opts: source_opts,
-                       refresh_rate: rate
-                     ]}
-                  )
-              end)
+        [{AlphabeticAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
+          for name <- ?a..?z do
+            DynamicSupervisor.start_child(
+              Pollex.DynamicSupervisor,
+              {Pollex.AlphabeticCache,
+               [
+                 name: String.to_atom(<<name>>),
+                 cache_opts: cache_opts,
+                 source_opts: source_opts,
+                 refresh_rate: rate
+               ]}
+            )
           end
-        end)
-    end
+
+        [{GenServerCacheAdapter, _cache_opts}, {CSVFileSourceAdapter, _source_opts}] ->
+          DynamicSupervisor.start_child(
+            Pollex.DynamicSupervisor,
+            {Pollex.CSVGenServerCache,
+             [
+               name: dataset_name,
+               refresh_rate: rate
+             ]}
+          )
+      end
+    end)
   end
 end
