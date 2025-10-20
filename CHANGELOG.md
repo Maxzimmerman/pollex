@@ -73,3 +73,6 @@ You can then fetch the entries matching the letter like this
 
 ## [0.4.10] - 20.10.2025
 - Restricted the retries when repo not ready to 10.
+
+## [0.4.11] - 20.10.2025
+- Updated the documentation for each cache strategy.
