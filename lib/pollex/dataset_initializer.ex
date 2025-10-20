@@ -18,8 +18,7 @@ defmodule Pollex.DatasetInitializer do
   @spec handle_info(:init_datasets, any()) :: {:noreply, any()}
   def handle_info(:init_datasets, state) do
     datasets = Application.get_env(:pollex, Pollex.Application)[:datasets]
-    IO.inspect(datasets)
-    IO.puts("Called")
+
     if is_nil(datasets) do
       Logger.info("[Pollex] No datasets configured.")
       {:noreply, state}
