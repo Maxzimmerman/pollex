@@ -41,7 +41,6 @@ defmodule Pollex.DatasetInitializer do
   end
 
   defp schedule_retry(tries) when @max_retries > tries do
-    IO.puts("Retry ##{tries}")
     Process.send_after(self(), :init_datasets, @retry_ms)
   end
 
