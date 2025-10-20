@@ -64,3 +64,6 @@ You can then fetch the entries matching the letter like this
 
 ## [0.4.7] - 20.10.2025
 - Created a initialize dataset module which checks if the consumer provided a repo.
+
+## [0.4.8] - 20.10.2025
+- Removed some debugging lines.
