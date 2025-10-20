@@ -3,45 +3,52 @@ defmodule Pollex.DatasetInitializer do
   require Logger
 
   @retry_ms 2_000
+  @max_retries 10
 
   def start_link(_args) do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
   @impl true
-  def init(state) do
+  def init(_state) do
     Process.send_after(self(), :init_datasets, @retry_ms)
-    {:ok, state}
+    {:ok, %{tries: 0}}
   end
 
   @impl true
-  def handle_info(:init_datasets, state) do
-    case Application.get_env(:pollex, Pollex.Application) do
-      nil ->
-        Logger.info("[Pollex] No :pollex, Pollex.Application config found — retrying...")
-        schedule_retry()
-        {:noreply, state}
+  def handle_info(:init_datasets, %{tries: tries} = state) do
+    config = Application.get_env(:pollex, Pollex.Application)
 
-      %{datasets: datasets} when map_size(datasets) > 0 ->
-        case repo_ready?(datasets) do
-          true ->
-            Logger.info("[Pollex] Starting datasets...")
-            start_datasets(datasets)
-            {:noreply, state}
+    datasets = Keyword.get(config || [], :datasets)
 
-          false ->
-            Logger.info("[Pollex] Repo not ready — retrying in #{@retry_ms}ms")
-            schedule_retry()
-            {:noreply, state}
-        end
+    new_state = %{state | tries: tries + 1}
 
-      _ ->
-        Logger.info("[Pollex] No datasets configured.")
-        {:noreply, state}
+    if is_nil(datasets) or map_size(datasets) == 0 do
+      Logger.info("[Pollex] No datasets configured — retrying...")
+      schedule_retry(new_state.tries)
+      {:noreply, new_state}
+    else
+      if repo_ready?(datasets) do
+        Logger.info("[Pollex] Starting datasets...")
+        start_datasets(datasets)
+        {:noreply, new_state}
+      else
+        Logger.info("[Pollex] Repo is not ready yet")
+        schedule_retry(new_state.tries)
+        {:noreply, new_state}
+      end
     end
   end
 
-  defp schedule_retry, do: Process.send_after(self(), :init_datasets, @retry_ms)
+  defp schedule_retry(tries) when @max_retries > tries do
+    IO.puts("Retry ##{tries}")
+    Process.send_after(self(), :init_datasets, @retry_ms)
+  end
+
+  defp schedule_retry(tries) do
+    Logger.warning("[Pollex] Reached max retries (#{tries}) — stopping retry loop")
+    :ok
+  end
 
   defp repo_ready?(datasets) do
     Enum.all?(datasets, fn {_name, %{source: {_adapter, opts}}} ->
