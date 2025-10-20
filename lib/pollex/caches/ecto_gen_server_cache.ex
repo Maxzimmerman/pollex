@@ -11,10 +11,10 @@ defmodule Pollex.EctoGenServerCache do
         datasets: %{
           cities: %{
             refresh_interval_seconds: 6,
-            source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
-            cache: {GenServerCacheAdapter, [columns: [:name]]}
+            cache: {GenServerCacheAdapter, [columns: [:name]]},
+            source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]}
           }
-      }
+        }
 
   You configure a dataset, an interval, a table, repo and the columns you want to fetch.
   The application will start a Genserver process per dataset and run for you.

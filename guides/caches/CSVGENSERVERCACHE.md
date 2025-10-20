@@ -14,8 +14,8 @@ config :pollex, Pollex.Application,
     csvs: %{
         countries: %{
             refresh_interval_seconds: 3,
-            source: {CSVFileSourceAdapter, []},
             cache: {GenServerCacheAdapter, []}
+            source: {CSVFileSourceAdapter, []}
         }
 }
 ```

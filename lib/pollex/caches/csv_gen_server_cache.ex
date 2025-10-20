@@ -8,11 +8,11 @@ defmodule Pollex.CSVGenServerCache do
   1. Configure the cache
 
       config :pollex, Pollex.Application,
-        csvs: %{
-          countries: %{
-            refresh_interval_seconds: 3,
-            source: {CSVFileSourceAdapter, []},
-            cache: {GenServerCacheAdapter, []}
+        datasets: %{
+          cities: %{
+            refresh_interval_seconds: 6,
+            cache: {GenServerCacheAdapter, [columns: [:name]]},
+            source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]}
           }
         }
 

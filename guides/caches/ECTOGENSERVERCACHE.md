@@ -13,8 +13,8 @@ config :pollex, Pollex.Application,
   datasets: %{
     cities: %{
       refresh_interval_seconds: 6,
-      source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
-      cache: {GenServerCacheAdapter, [columns: [:name]]}
+      cache: {GenServerCacheAdapter, [columns: [:name]]},
+      source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]}
     }
   }
 ```
