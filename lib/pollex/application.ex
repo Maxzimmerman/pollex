@@ -3,81 +3,18 @@ defmodule Pollex.Application do
 
   use Application
 
+  @impl true
   def start(_type, _args) do
     children = [
       {DynamicSupervisor, name: Pollex.DynamicSupervisor, strategy: :one_for_one},
-      Pollex.Repo,
-      {Task.Supervisor, name: Pollex.TaskSuperVisor}
+
+      {Task.Supervisor, name: Pollex.TaskSuperVisor},
+      Pollex.DatasetInitializer,
+      Pollex.Repo
     ]
 
     opts = [strategy: :one_for_one, name: Pollex.Supervisor]
 
-    {:ok, pid} = Supervisor.start_link(children, opts)
-    init()
-
-    {:ok, pid}
-  end
-
-  @spec init() :: :ok
-  def init do
-    datasets = Application.get_env(:pollex, __MODULE__)[:datasets]
-
-    case datasets do
-      nil ->
-        Logger.info("Nothing to start")
-
-      datasets ->
-        Enum.each(datasets, fn dataset ->
-          {dataset_name, %{cache: cache, source: source, refresh_interval_seconds: rate}} =
-            dataset
-
-          case [cache, source] do
-            [{GenServerCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
-              process_name = dataset_name
-
-              {:ok, _pid} =
-                DynamicSupervisor.start_child(
-                  Pollex.DynamicSupervisor,
-                  {Pollex.EctoGenServerCache,
-                   [
-                     name: process_name,
-                     cache_opts: cache_opts,
-                     source_opts: source_opts,
-                     refresh_rate: rate
-                   ]}
-                )
-
-            [{GenServerCacheAdapter, _cache_opts}, {CSVFileSourceAdapter, _source_opts}] ->
-              process_name = dataset_name
-
-              {:ok, _pid} =
-                DynamicSupervisor.start_child(
-                  Pollex.DynamicSupervisor,
-                  {Pollex.CSVGenServerCache,
-                   [
-                     name: process_name,
-                     refresh_rate: rate
-                   ]}
-                )
-
-            [{AlphabeticAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
-              names = for name <- ?a..?z, do: <<name>>
-
-              Enum.each(names, fn name ->
-                {:ok, _pid} =
-                  DynamicSupervisor.start_child(
-                    Pollex.DynamicSupervisor,
-                    {Pollex.AlphabeticCache,
-                     [
-                       name: String.to_atom(name),
-                       cache_opts: cache_opts,
-                       source_opts: source_opts,
-                       refresh_rate: rate
-                     ]}
-                  )
-              end)
-          end
-        end)
-    end
+    Supervisor.start_link(children, opts)
   end
 end
