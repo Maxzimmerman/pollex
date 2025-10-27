@@ -16,6 +16,7 @@ defmodule Pollex.CacheAdapter.GenserverCacheAdapter do
       """
       @spec start_link(keyword()) :: :ignore | {:error, any()} | {:ok, pid()}
       def start_link(opts) do
+        IO.puts("{{{{{{{{{in depts #{opts} }}}}}}}}}")
         name = Keyword.fetch!(opts, :name)
         GenServer.start_link(__MODULE__, opts, name: name)
       end
