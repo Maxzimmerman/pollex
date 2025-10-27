@@ -56,7 +56,10 @@ defmodule Pollex.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
-      {:csv, "~> 3.2"}
+      {:csv, "~> 3.2"},
+      {:nebulex, "~> 2.6"},
+      {:shards, "~> 1.0"},
+      {:decorator, "~> 1.4"}
     ]
   end
 
