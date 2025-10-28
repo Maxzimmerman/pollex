@@ -9,14 +9,27 @@ defmodule Pollex.NebulexCache do
   def init(opts) do
     table = Keyword.fetch!(opts, :source_opts)[:table]
     repo = Keyword.fetch!(opts, :source_opts)[:repo]
-    interval = :timer.seconds(Keyword.fetch!(opts, :refresh_rate))
+    interval = Keyword.fetch!(opts, :refresh_rate)
     columns = Keyword.fetch!(opts, :cache_opts)[:columns]
 
+    interval = :timer.seconds(interval)
     {:ok, data} = load(table, repo, columns)
-    Cache.put_all(data)
-    schedule_refresh(interval)
 
-    IO.puts("{{{{{{{{{MADE IT}}}}}}}}}")
+    transformed_data =
+      Map.new(data, fn entry ->
+        case Map.to_list(entry) do
+          [{_key, value} | _] ->
+            {to_string(value), entry}
+
+          [] ->
+            {nil, entry}
+        end
+      end)
+      |> Map.drop([nil])
+
+    Cache.put_all(transformed_data)
+
+    schedule_refresh(interval)
 
     {:ok, %{table: table, repo: repo, columns: columns, interval: interval}}
   end

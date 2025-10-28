@@ -99,10 +99,6 @@ defmodule Pollex.DatasetInitializer do
           )
 
         [{NebulexCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
-          IO.puts("{{{{{{{ FOUND  }}}}}}}")
-          IO.inspect(cache_opts)
-          IO.inspect(source_opts)
-          IO.inspect(dataset_name)
 
           DynamicSupervisor.start_child(
             Pollex.DynamicSupervisor,

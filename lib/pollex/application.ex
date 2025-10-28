@@ -8,6 +8,7 @@ defmodule Pollex.Application do
     children = [
       {DynamicSupervisor, name: Pollex.DynamicSupervisor, strategy: :one_for_one},
       {Task.Supervisor, name: Pollex.TaskSuperVisor},
+      Pollex.NebulexLocalCache,
       Pollex.Repo,
       Pollex.DatasetInitializer
     ]
