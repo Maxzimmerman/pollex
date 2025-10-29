@@ -22,7 +22,7 @@ defmodule Pollex.MixProject do
       main: "readme",
       extras: [
         "README.md": [title: "Overview"],
-        "guides/caches/GETTING_STARTED.md": [title: "Getting Started"],
+        "guides/GETTING_STARTED.md": [title: "Getting Started"],
         "guides/caches/ECTOGENSERVERCACHE.md": [title: "EctoGenServerCache"],
         "guides/caches/CSVGENSERVERCACHE.md": [title: "CSVGenServerCache"],
         "guides/caches/ALPHABETICCACHE.md": [title: "AlphabeticCache"],
