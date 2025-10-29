@@ -82,3 +82,6 @@ You can then fetch the entries matching the letter like this
 
 ## [0.5.12] - 29.10.2025
 - Added tutorial for the nebulex cache
+
+## [0.5.13] - 29.10.2025
+- Put the getting started page to the top
