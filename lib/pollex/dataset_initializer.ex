@@ -59,7 +59,8 @@ defmodule Pollex.DatasetInitializer do
   end
 
   defp start_datasets(datasets) do
-    Enum.each(datasets, fn {dataset_name, %{cache: cache, source: source, refresh_interval_seconds: rate}} ->
+    Enum.each(datasets, fn {dataset_name,
+                            %{cache: cache, source: source, refresh_interval_seconds: rate}} ->
       case [cache, source] do
         [{GenServerCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
           DynamicSupervisor.start_child(
@@ -93,6 +94,18 @@ defmodule Pollex.DatasetInitializer do
             {Pollex.CSVGenServerCache,
              [
                name: dataset_name,
+               refresh_rate: rate
+             ]}
+          )
+
+        [{NebulexCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
+          DynamicSupervisor.start_child(
+            Pollex.DynamicSupervisor,
+            {Pollex.NebulexCache,
+             [
+               name: dataset_name,
+               cache_opts: cache_opts,
+               source_opts: source_opts,
                refresh_rate: rate
              ]}
           )

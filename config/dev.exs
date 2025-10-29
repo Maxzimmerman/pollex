@@ -14,19 +14,26 @@ config :pollex, Pollex.Application,
   datasets: %{
     cities: %{
       refresh_interval_seconds: 6,
+      cache: {NebulexCacheAdapter, [columns: [:name]]},
       source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
-      cache: {AlphabeticAdapter, [columns: [:name]]}
+      cache_runtime_opts: [
+        gc_interval: :timer.hours(12),
+        max_size: 1_000_000,
+        allocated_memory: 2_000_000_000,
+        gc_cleanup_min_timeout: :timer.seconds(10),
+        gc_cleanup_max_timeout: :timer.minutes(10)
+      ]
     },
     citiess: %{
       refresh_interval_seconds: 6,
+      cache: {NebulexCacheAdapter, [columns: [:name]]},
       source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
-      cache: {GenServerCacheAdapter, [columns: [:name]]}
-    }
-  },
-  csvs: %{
-    countries: %{
-      refresh_interval_seconds: 3,
-      source: {CSVFileSourceAdapter, []},
-      cache: {GenServerCacheAdapter, []}
+      cache_runtime_opts: [
+        gc_interval: :timer.hours(12),
+        max_size: 1_000_000,
+        allocated_memory: 2_000_000_000,
+        gc_cleanup_min_timeout: :timer.seconds(10),
+        gc_cleanup_max_timeout: :timer.minutes(10)
+      ]
     }
   }
