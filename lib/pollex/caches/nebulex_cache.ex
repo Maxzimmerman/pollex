@@ -1,4 +1,46 @@
 defmodule Pollex.NebulexCache do
+  @moduledoc """
+  This module acts as a cache for data pulled from a configured file.
+  It holds methods to referesh the cache and has functionality to the data up at any time.
+
+  Example usage:
+
+  1. Configure the cache
+
+      config :pollex, Pollex.Application,
+        datasets: %{
+          cities: %{
+            refresh_interval_seconds: 6,
+            cache: {NebulexCacheAdapter, [columns: [:name]]},
+            source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
+            cache_runtime_opts: [
+              gc_interval: :timer.hours(12),
+              max_size: 1_000_000,
+              allocated_memory: 2_000_000_000,
+              gc_cleanup_min_timeout: :timer.seconds(10),
+              gc_cleanup_max_timeout: :timer.minutes(10)
+            ]
+          }
+        }
+
+  You configure a dataset, and an interval.
+  The application will start a Genserver process per dataset and run for you.
+
+  2. Get the data
+
+      iex> NebulexCache.lookup(:cities)
+      iex>
+      %{
+        "australia" => "australia",
+        "austria" => "austria",
+        "azerbaijan" => "azerbaijan",
+        "germany" => "germany",
+        "russia" => "russia",
+        "united kingdom" => "united kingdom",
+        "usa" => "usa"
+      }
+  """
+
   require Logger
 
   use Pollex.SrcAdapter.EctoAdapter
@@ -11,17 +53,47 @@ defmodule Pollex.NebulexCache do
     repo = Keyword.fetch!(opts, :source_opts)[:repo]
     interval = Keyword.fetch!(opts, :refresh_rate)
     columns = Keyword.fetch!(opts, :cache_opts)[:columns]
+    cache_opts = Keyword.get(opts, :cache_runtime_opts, [])
 
     interval = :timer.seconds(interval)
     {:ok, data} = load(table, repo, columns)
 
     transformed_data = transform_to_nebulex_format(data)
 
-    Cache.put_all(transformed_data)
+    # Start internall cache and put in the data
+    sub_cache_name = :"cache_#{inspect self()}"
+    {:ok, cache_pid} =
+      Cache.start_link(
+        Keyword.merge(
+          [name: sub_cache_name],
+          cache_opts
+        )
+      )
+
+    # unlink the process so this process will not crash when the subcache crashes
+    Process.unlink(cache_pid)
+    # monitor it to receive a message when the sub cache crashes
+    ref = Process.monitor(cache_pid)
+
+    Cache.put_all(transformed_data, name: sub_cache_name)
 
     schedule_refresh(interval)
 
-    {:ok, %{table: table, repo: repo, columns: columns, interval: interval}}
+    {:ok, %{table: table, repo: repo, columns: columns, interval: interval, sub_cache_ref: ref, sub_cache_name: sub_cache_name}}
+  end
+
+  # this function is called when the child nebulex cache process dies
+  # it will log the crash and restart it
+  @impl true
+  def handle_info({:DOWN, ref, :process, _pid, reason}, %{sub_cache_ref: ref, sub_cache_name: name} = state) do
+    Logger.info("Sub-cache crashed: #{inspect(reason)} — restarting cache")
+
+    sub_cache_name = name
+    {:ok, cache_pid} = Cache.start_link(name: sub_cache_name)
+    Process.unlink(cache_pid)
+    new_ref = Process.monitor(cache_pid)
+
+    {:noreply, %{state | sub_cache_ref: new_ref}}
   end
 
   @impl true
@@ -44,18 +116,42 @@ defmodule Pollex.NebulexCache do
   end
 
   @impl true
-  def handle_cast({:update, data}, state) do
-    Cache.put_all(data)
+  def handle_cast({:update, data}, %{sub_cache_name: name} = state) do
+    transformed_data = transform_to_nebulex_format(data)
+    Cache.put_all(transformed_data ,name: name)
     {:noreply, state}
   end
 
   @impl true
-  def handle_call(:get, _from, state) do
-    keys = Cache.all()
-    data = Cache.get_all(keys)
+  def handle_call(:get, _from, %{sub_cache_name: name} = state) do
+    data =
+      Cache.stream(nil, name: name)
+      |> Enum.map(fn
+        {k, v} -> {k, v}
+        other -> {other, other}
+      end)
+      |> Map.new()
+
     {:reply, data, state}
   end
 
+  @doc """
+  Public api function which calls the Genserver callback to fetch the data
+
+    Example:
+
+      iex> NebulexCache.lookup(:cities)
+      iex>
+      %{
+        "australia" => "australia",
+        "austria" => "austria",
+        "azerbaijan" => "azerbaijan",
+        "germany" => "germany",
+        "russia" => "russia",
+        "united kingdom" => "united kingdom",
+        "usa" => "usa"
+      }
+  """
   def lookup(name), do: GenServer.call(name, :get)
 
   def transform_to_nebulex_format(data) do
