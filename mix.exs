@@ -25,14 +25,15 @@ defmodule Pollex.MixProject do
         "guides/caches/GETTING_STARTED.md": [title: "Getting Started"],
         "guides/caches/ECTOGENSERVERCACHE.md": [title: "EctoGenServerCache"],
         "guides/caches/CSVGENSERVERCACHE.md": [title: "CSVGenServerCache"],
-        "guides/caches/ALPHABETICCACHE.md": [title: "AlphabeticCache"]
+        "guides/caches/ALPHABETICCACHE.md": [title: "AlphabeticCache"],
+        "guides/caches/NEBULEXCACHE.md": [title: "NebulexCache"]
       ],
       groups_for_extras: [
         Tutorials: [
-          "guides/caches/GETTING_STARTED.md",
           "guides/caches/ECTOGENSERVERCACHE.md",
           "guides/caches/CSVGENSERVERCACHE.md",
-          "guides/caches/ALPHABETICCACHE.md"
+          "guides/caches/ALPHABETICCACHE.md",
+          "guides/caches/NEBULEXCACHE.md"
         ]
       ]
     ]
