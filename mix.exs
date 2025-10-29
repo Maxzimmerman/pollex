@@ -59,7 +59,8 @@ defmodule Pollex.MixProject do
       {:csv, "~> 3.2"},
       {:nebulex, "~> 2.6"},
       {:shards, "~> 1.0"},
-      {:decorator, "~> 1.4"}
+      {:decorator, "~> 1.4"},
+      {:stream_data, "~> 1.2"}
     ]
   end
 

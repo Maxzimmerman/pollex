@@ -15,17 +15,7 @@ defmodule Pollex.NebulexCache do
     interval = :timer.seconds(interval)
     {:ok, data} = load(table, repo, columns)
 
-    transformed_data =
-      Map.new(data, fn entry ->
-        case Map.to_list(entry) do
-          [{_key, value} | _] ->
-            {to_string(value), entry}
-
-          [] ->
-            {nil, entry}
-        end
-      end)
-      |> Map.drop([nil])
+    transformed_data = transform_to_nebulex_format(data)
 
     Cache.put_all(transformed_data)
 
@@ -67,4 +57,17 @@ defmodule Pollex.NebulexCache do
   end
 
   def lookup(name), do: GenServer.call(name, :get)
+
+  def transform_to_nebulex_format(data) do
+    Map.new(data, fn entry ->
+      case Map.to_list(entry) do
+        [{_key, value} | _] ->
+          {to_string(value), entry}
+
+        [] ->
+          {nil, entry}
+      end
+    end)
+    |> Map.drop([nil])
+  end
 end

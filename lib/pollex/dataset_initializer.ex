@@ -99,7 +99,6 @@ defmodule Pollex.DatasetInitializer do
           )
 
         [{NebulexCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
-
           DynamicSupervisor.start_child(
             Pollex.DynamicSupervisor,
             {Pollex.NebulexCache,
