@@ -79,3 +79,6 @@ You can then fetch the entries matching the letter like this
 
 ## [0.5.11] - 29.10.2025
 - Added a new Nebulex cache strategy.
+
+## [0.5.12] - 29.10.2025
+- Added tutorial for the nebulex cache
