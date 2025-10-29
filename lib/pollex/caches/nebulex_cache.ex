@@ -61,7 +61,8 @@ defmodule Pollex.NebulexCache do
     transformed_data = transform_to_nebulex_format(data)
 
     # Start internall cache and put in the data
-    sub_cache_name = :"cache_#{inspect self()}"
+    sub_cache_name = :"cache_#{inspect(self())}"
+
     {:ok, cache_pid} =
       Cache.start_link(
         Keyword.merge(
@@ -72,28 +73,19 @@ defmodule Pollex.NebulexCache do
 
     # unlink the process so this process will not crash when the subcache crashes
     Process.unlink(cache_pid)
-    # monitor it to receive a message when the sub cache crashes
-    ref = Process.monitor(cache_pid)
 
     Cache.put_all(transformed_data, name: sub_cache_name)
 
     schedule_refresh(interval)
 
-    {:ok, %{table: table, repo: repo, columns: columns, interval: interval, sub_cache_ref: ref, sub_cache_name: sub_cache_name}}
-  end
-
-  # this function is called when the child nebulex cache process dies
-  # it will log the crash and restart it
-  @impl true
-  def handle_info({:DOWN, ref, :process, _pid, reason}, %{sub_cache_ref: ref, sub_cache_name: name} = state) do
-    Logger.info("Sub-cache crashed: #{inspect(reason)} — restarting cache")
-
-    sub_cache_name = name
-    {:ok, cache_pid} = Cache.start_link(name: sub_cache_name)
-    Process.unlink(cache_pid)
-    new_ref = Process.monitor(cache_pid)
-
-    {:noreply, %{state | sub_cache_ref: new_ref}}
+    {:ok,
+     %{
+       table: table,
+       repo: repo,
+       columns: columns,
+       interval: interval,
+       sub_cache_name: sub_cache_name
+     }}
   end
 
   @impl true
@@ -118,7 +110,7 @@ defmodule Pollex.NebulexCache do
   @impl true
   def handle_cast({:update, data}, %{sub_cache_name: name} = state) do
     transformed_data = transform_to_nebulex_format(data)
-    Cache.put_all(transformed_data ,name: name)
+    Cache.put_all(transformed_data, name: name)
     {:noreply, state}
   end
 

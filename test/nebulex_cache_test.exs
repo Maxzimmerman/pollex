@@ -18,6 +18,7 @@ defmodule NebulexCacheTest do
     source_opts = [table: City, repo: Repo]
     cache_opts = [columns: [:name]]
     interval = 1
+
     sub_cache_opts = [
       gc_interval: :timer.hours(12),
       max_size: 1_000_000,
@@ -30,11 +31,11 @@ defmodule NebulexCacheTest do
       start_supervised!(
         {NebulexCache,
          [
-          name: name,
-          source_opts: source_opts,
-          cache_opts: cache_opts,
-          refresh_rate: interval,
-          cache_runtime_opts: sub_cache_opts
+           name: name,
+           source_opts: source_opts,
+           cache_opts: cache_opts,
+           refresh_rate: interval,
+           cache_runtime_opts: sub_cache_opts
          ]}
       )
 
@@ -42,18 +43,20 @@ defmodule NebulexCacheTest do
   end
 
   describe "test the cache itself" do
-      test "state updates after poll", %{name: name} do
+    test "state updates after poll", %{name: name} do
       Process.sleep(100)
 
       data = NebulexCache.lookup(name)
-      assert Enum.any?(data, &(&1.name == "germany"))
+
+      assert Map.has_key?(data, "germany")
+      assert data["germany"] == "germany"
     end
 
     test "initial state loads from DB", %{name: name} do
       Process.sleep(100)
       data = NebulexCache.lookup(name)
-      assert Enum.any?(data, &(&1.name == "germany"))
-      assert Enum.any?(data, &(&1.name == "usa"))
+      assert data["germany"] == "germany"
+      assert data["usa"] == "usa"
     end
   end
 
