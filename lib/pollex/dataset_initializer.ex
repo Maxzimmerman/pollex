@@ -74,7 +74,7 @@ defmodule Pollex.DatasetInitializer do
              ]}
           )
 
-        [{AlphabeticAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
+        [{GenServerCacheAdapter, cache_opts}, {AlphabeticAdapter, source_opts}] ->
           for name <- ?a..?z do
             DynamicSupervisor.start_child(
               Pollex.DynamicSupervisor,

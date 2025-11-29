@@ -9,8 +9,8 @@ config :pollex, Pollex.Application,
   datasets: %{
     unlocodes: %{
       refresh_interval_seconds: 6,
-      cache: {AlphabeticAdapter, [columns: [:name]]},
-      source: {EctoSourceAdapter, [table: Mosaic.City, repo: Pollex.Repo]}
+      cache: {GenServerCacheAdapter, [columns: [:name]]},
+      source: {AlphabeticAdapter, [table: Mosaic.City, repo: Pollex.Repo]}
     }
   }
 ```
