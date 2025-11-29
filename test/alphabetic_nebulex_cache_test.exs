@@ -4,6 +4,7 @@ defmodule AlphabeticNebulexCacheTest do
 
   alias Pollex.{Repo, City}
   alias Pollex.AlphabeticNebulexCache
+  alias Pollex.Helpers.Nebulex, as: NebulexHelpers
 
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
@@ -82,12 +83,12 @@ defmodule AlphabeticNebulexCacheTest do
         "usa" => %{code: "usa"}
       }
 
-      assert AlphabeticNebulexCache.transform_to_nebulex_format(data) == expected
+      assert NebulexHelpers.transform_to_nebulex_format(data) == expected
     end
 
     property "returns a valid nebulex data forma" do
       check all(data <- generate_map()) do
-        result = AlphabeticNebulexCache.transform_to_nebulex_format(data)
+        result = NebulexHelpers.transform_to_nebulex_format(data)
 
         assert is_map(result)
 

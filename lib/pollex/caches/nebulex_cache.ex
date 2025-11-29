@@ -46,6 +46,7 @@ defmodule Pollex.NebulexCache do
   use Pollex.SrcAdapter.EctoAdapter
   use Pollex.CacheAdapter.GenServerCacheAdapter
   alias Pollex.NebulexLocalCache, as: Cache
+  alias Pollex.Helpers.Nebulex, as: NebulexHelpers
 
   @impl true
   def init(opts) do
@@ -58,7 +59,7 @@ defmodule Pollex.NebulexCache do
     interval = :timer.seconds(interval)
     {:ok, data} = load(table, repo, columns)
 
-    transformed_data = transform_to_nebulex_format(data)
+    transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
 
     # Start internall cache and put in the data
     sub_cache_name = :"cache_#{inspect(self())}"
@@ -109,7 +110,7 @@ defmodule Pollex.NebulexCache do
 
   @impl true
   def handle_cast({:update, data}, %{sub_cache_name: name} = state) do
-    transformed_data = transform_to_nebulex_format(data)
+    transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
     Cache.put_all(transformed_data, name: name)
     {:noreply, state}
   end
@@ -145,17 +146,4 @@ defmodule Pollex.NebulexCache do
       }
   """
   def lookup(name), do: GenServer.call(name, :get)
-
-  def transform_to_nebulex_format(data) do
-    Map.new(data, fn entry ->
-      case Map.to_list(entry) do
-        [{_key, value} | _] ->
-          {to_string(value), entry}
-
-        [] ->
-          {nil, entry}
-      end
-    end)
-    |> Map.drop([nil])
-  end
 end

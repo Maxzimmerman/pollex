@@ -33,6 +33,7 @@ defmodule Pollex.AlphabeticNebulexCache do
   use Pollex.SrcAdapter.AlphabeticAdapter
   use Pollex.CacheAdapter.GenServerCacheAdapter
   alias Pollex.NebulexLocalCache, as: Cache
+  alias Pollex.Helpers.Nebulex, as: NebulexHelpers
 
   @spec init(any()) :: {:ok, map()}
   @impl true
@@ -47,7 +48,7 @@ defmodule Pollex.AlphabeticNebulexCache do
     interval = :timer.seconds(interval)
     {:ok, data} = load(table, repo, columns, Kernel.to_string(name))
 
-    transformed_data = transform_to_nebulex_format(data)
+    transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
 
     sub_cache_name = :"cache_#{inspect(self())}"
 
@@ -112,7 +113,7 @@ defmodule Pollex.AlphabeticNebulexCache do
 
   @impl true
   def handle_cast({:update, new_data}, %{sub_cache_name: name} = state) do
-    transformed_data = transform_to_nebulex_format(new_data)
+    transformed_data = NebulexHelpers.transform_to_nebulex_format(new_data)
     Cache.put_all(transformed_data, name: name)
     {:noreply, state}
   end
@@ -122,7 +123,7 @@ defmodule Pollex.AlphabeticNebulexCache do
 
     Example:
 
-      iex> AlphabeticCache.lookup(:a)
+      iex> AlphabeticNebulexCache.lookup(:a)
       iex>
       [
         %{name: "australia"},
@@ -132,17 +133,4 @@ defmodule Pollex.AlphabeticNebulexCache do
   @spec lookup(atom()) :: list(map())
   @impl true
   def lookup(name), do: GenServer.call(name, :get)
-
-  def transform_to_nebulex_format(data) do
-    Map.new(data, fn entry ->
-      case Map.to_list(entry) do
-        [{_key, value} | _] ->
-          {to_string(value), entry}
-
-        [] ->
-          {nil, entry}
-      end
-    end)
-    |> Map.drop([nil])
-  end
 end
