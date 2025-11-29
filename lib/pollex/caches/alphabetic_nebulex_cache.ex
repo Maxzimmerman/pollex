@@ -11,8 +11,8 @@ defmodule Pollex.AlphabeticNebulexCache do
         datasets: %{
           unlocodes: %{
             refresh_interval_seconds: 6,
-            cache: {AlphabeticAdapter, [columns: [:name]]},
-            source: {EctoSourceAdapter, [table: Mosaic.City, repo: Pollex.Repo]}
+            cache: {NebulexCacheAdapter, [columns: [:name]]},
+            source: {AlphabeticAdapter, [table: Mosaic.City, repo: Pollex.Repo]}
           }
         }
 
@@ -21,7 +21,7 @@ defmodule Pollex.AlphabeticNebulexCache do
 
   2. Get the data
 
-      iex> AlphabeticCache.lookup(:a)
+      iex> AlphabeticNebulexCache.lookup(:a)
       iex>
       [
         %{name: "australia"},
