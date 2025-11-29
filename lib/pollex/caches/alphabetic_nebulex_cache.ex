@@ -50,7 +50,6 @@ defmodule Pollex.AlphabeticNebulexCache do
     transformed_data = transform_to_nebulex_format(data)
 
     sub_cache_name = :"cache_#{inspect(self())}"
-    IO.inspect(sub_cache_name)
 
     {:ok, cache_pid} =
       Cache.start_link(
@@ -68,14 +67,14 @@ defmodule Pollex.AlphabeticNebulexCache do
 
     {:ok,
      %{
-      table: table,
-      repo: repo,
-      columns: columns,
-      interval: interval,
-      name: name,
-      data: data,
-      sub_cache_name: sub_cache_name
-      }}
+       table: table,
+       repo: repo,
+       columns: columns,
+       interval: interval,
+       name: name,
+       data: data,
+       sub_cache_name: sub_cache_name
+     }}
   end
 
   @impl true
@@ -103,10 +102,10 @@ defmodule Pollex.AlphabeticNebulexCache do
     data =
       Cache.stream(nil, name: name)
       |> Enum.map(fn
-         {k, v} -> {k, v}
-          other -> {other, other}
-        end)
-        |> Map.new()
+        {k, v} -> {k, v}
+        other -> {other, other}
+      end)
+      |> Map.new()
 
     {:reply, data, state}
   end

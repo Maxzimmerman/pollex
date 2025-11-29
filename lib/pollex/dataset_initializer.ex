@@ -114,13 +114,12 @@ defmodule Pollex.DatasetInitializer do
           DynamicSupervisor.start_child(
             Pollex.DynamicSupervisor,
             {Pollex.NebulexCache,
-              [
-                name: dataset_name,
-                cache_opts: cache_opts,
-                source_opts: source_opts,
-                refresh_rate: rate
-              ]
-            }
+             [
+               name: dataset_name,
+               cache_opts: cache_opts,
+               source_opts: source_opts,
+               refresh_rate: rate
+             ]}
           )
       end
     end)
