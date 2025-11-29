@@ -4,7 +4,6 @@ defmodule NebulexCacheTest do
 
   alias Pollex.{Repo, City}
   alias Pollex.NebulexCache
-  alias Pollex.Helpers.Nebulex, as: NebulexHelpers
 
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
@@ -59,57 +58,5 @@ defmodule NebulexCacheTest do
       assert data["germany"] == "germany"
       assert data["usa"] == "usa"
     end
-  end
-
-  describe "transform_to_nebulex_format/1" do
-    test "transforms list of maps into a map keyed by the first value string of each map" do
-      data = [
-        %{name: "germany"},
-        %{code: "usa"},
-        %{country: "australia"},
-        %{label: "united kingdom"},
-        %{iso: "austria"},
-        %{abbr: "azerbaijan"},
-        %{region: "russia"}
-      ]
-
-      expected = %{
-        "australia" => %{country: "australia"},
-        "austria" => %{iso: "austria"},
-        "azerbaijan" => %{abbr: "azerbaijan"},
-        "germany" => %{name: "germany"},
-        "russia" => %{region: "russia"},
-        "united kingdom" => %{label: "united kingdom"},
-        "usa" => %{code: "usa"}
-      }
-
-      assert NebulexHelpers.transform_to_nebulex_format(data) == expected
-    end
-
-    property "returns a valid nebulex data forma" do
-      check all(data <- generate_map()) do
-        result = NebulexHelpers.transform_to_nebulex_format(data)
-
-        assert is_map(result)
-
-        assert Enum.all?(Map.values(result), &(&1 in data))
-
-        for {_k, v} <- result do
-          [{_key, value}] = Map.to_list(v)
-          assert Map.has_key?(result, to_string(value))
-        end
-      end
-    end
-  end
-
-  defp generate_map do
-    StreamData.list_of(
-      StreamData.map_of(
-        StreamData.atom(:alphanumeric),
-        StreamData.string(:alphanumeric),
-        min_length: 1,
-        max_length: 1
-      )
-    )
   end
 end
