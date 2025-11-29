@@ -44,7 +44,7 @@ defmodule Pollex.NebulexCache do
   require Logger
 
   use Pollex.SrcAdapter.EctoAdapter
-  use Pollex.CacheAdapter.GenserverCacheAdapter
+  use Pollex.CacheAdapter.GenServerCacheAdapter
   alias Pollex.NebulexLocalCache, as: Cache
 
   @impl true

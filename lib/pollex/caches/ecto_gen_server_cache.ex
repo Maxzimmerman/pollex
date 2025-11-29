@@ -33,7 +33,7 @@ defmodule Pollex.EctoGenServerCache do
   """
   require Logger
   use Pollex.SrcAdapter.EctoAdapter
-  use Pollex.CacheAdapter.GenserverCacheAdapter
+  use Pollex.CacheAdapter.GenServerCacheAdapter
 
   @spec init(any()) :: {:ok, map()}
   @impl true

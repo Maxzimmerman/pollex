@@ -31,7 +31,7 @@ defmodule Pollex.AlphabeticNebulexCache do
 
   require Logger
   use Pollex.SrcAdapter.AlphabeticAdapter
-  use Pollex.CacheAdapter.GenserverCacheAdapter
+  use Pollex.CacheAdapter.GenServerCacheAdapter
   alias Pollex.NebulexLocalCache, as: Cache
 
   @spec init(any()) :: {:ok, map()}
