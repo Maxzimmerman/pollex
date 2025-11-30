@@ -15,7 +15,7 @@ config :pollex, Pollex.Application,
     cities: %{
       refresh_interval_seconds: 6,
       cache: {NebulexCacheAdapter, [columns: [:name]]},
-      source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
+      source: {AlphabeticAdapter, [table: Pollex.City, repo: Pollex.Repo]},
       cache_runtime_opts: [
         gc_interval: :timer.hours(12),
         max_size: 1_000_000,
@@ -27,7 +27,7 @@ config :pollex, Pollex.Application,
     citiess: %{
       refresh_interval_seconds: 6,
       cache: {NebulexCacheAdapter, [columns: [:name]]},
-      source: {EctoSourceAdapter, [table: Pollex.City, repo: Pollex.Repo]},
+      source: {AlphabeticAdapter, [table: Pollex.City, repo: Pollex.Repo]},
       cache_runtime_opts: [
         gc_interval: :timer.hours(12),
         max_size: 1_000_000,
