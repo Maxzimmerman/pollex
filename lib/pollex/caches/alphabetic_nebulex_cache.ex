@@ -32,7 +32,6 @@ defmodule Pollex.AlphabeticNebulexCache do
   require Logger
   use Pollex.SrcAdapter.AlphabeticAdapter
   use Pollex.CacheAdapter.GenServerCacheAdapter
-  alias Pollex.NebulexLocalCache, as: Cache
   alias Pollex.Helpers.Nebulex, as: NebulexHelpers
 
   @spec init(any()) :: {:ok, map()}
@@ -43,42 +42,32 @@ defmodule Pollex.AlphabeticNebulexCache do
     repo = Keyword.fetch!(opts, :source_opts)[:repo]
     interval = Keyword.fetch!(opts, :refresh_rate)
     columns = Keyword.fetch!(opts, :cache_opts)[:columns]
-    cache_opts = Keyword.get(opts, :cache_runtime_opts, [])
 
     interval = :timer.seconds(interval)
     {:ok, data} = load(table, repo, columns, Kernel.to_string(name))
 
     transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
-    IO.puts("TRANSFORMED")
-    IO.inspect(transformed_data)
 
-    sub_cache_name = :"cache_#{inspect(self())}"
+    # IMPORTANT — build per-letter cache module
+    cache_module = Pollex.DynamicCacheBuilder.build(name)
 
-    {:ok, cache_pid} =
-      Cache.start_link(
-        Keyword.merge(
-          [name: sub_cache_name],
-          cache_opts
-        )
-      )
-
-    Process.unlink(cache_pid)
-
-    Cache.put_all(transformed_data, name: sub_cache_name)
+    # IMPORTANT — use dynamic module, not Cache
+    cache_module.put_all(transformed_data)
 
     schedule_refresh(interval)
 
     {:ok,
-     %{
-       table: table,
-       repo: repo,
-       columns: columns,
-       interval: interval,
-       name: name,
-       data: data,
-       sub_cache_name: sub_cache_name
-     }}
+    %{
+      table: table,
+      repo: repo,
+      columns: columns,
+      interval: interval,
+      name: name,
+      data: data,
+      cache_module: cache_module
+    }}
   end
+
 
   @impl true
   def handle_info(
@@ -101,22 +90,22 @@ defmodule Pollex.AlphabeticNebulexCache do
   end
 
   @impl true
-  def handle_call(:get, _from, %{sub_cache_name: name} = state) do
+  def handle_call(:get, _from, %{cache_module: cache} = state) do
     data =
-      Cache.stream(nil, name: name)
-      |> Enum.reduce(%{}, fn
-        {k, v}, acc -> Map.put(acc, k, v)
-        k, acc when is_binary(k) -> acc     # ignore raw keys without value
-        _, acc -> acc
+      cache.stream()
+      |> Enum.map(fn
+        {k, {:value, v}} -> {to_string(k), v}
+        {k, v} -> {to_string(k), v}
       end)
+      |> Map.new()
 
     {:reply, data, state}
   end
 
   @impl true
-  def handle_cast({:update, new_data}, %{sub_cache_name: name} = state) do
+  def handle_cast({:update, new_data}, %{cache_module: cache} = state) do
     transformed_data = NebulexHelpers.transform_to_nebulex_format(new_data)
-    Cache.put_all(transformed_data, name: name)
+    cache.put_all(transformed_data)
     {:noreply, state}
   end
 
