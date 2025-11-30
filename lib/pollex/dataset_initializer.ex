@@ -111,16 +111,18 @@ defmodule Pollex.DatasetInitializer do
           )
 
         [{NebulexCacheAdapter, cache_opts}, {AlphabeticAdapter, source_opts}] ->
-          DynamicSupervisor.start_child(
-            Pollex.DynamicSupervisor,
-            {Pollex.NebulexCache,
-             [
-               name: dataset_name,
-               cache_opts: cache_opts,
-               source_opts: source_opts,
-               refresh_rate: rate
-             ]}
-          )
+          for name <- ?a..?z do
+            DynamicSupervisor.start_child(
+              Pollex.DynamicSupervisor,
+              {Pollex.AlphabeticNebulexCache,
+              [
+                name: String.to_atom(<<name>>),
+                cache_opts: cache_opts,
+                source_opts: source_opts,
+                refresh_rate: rate
+              ]}
+            )
+          end
       end
     end)
   end

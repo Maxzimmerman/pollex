@@ -49,6 +49,8 @@ defmodule Pollex.AlphabeticNebulexCache do
     {:ok, data} = load(table, repo, columns, Kernel.to_string(name))
 
     transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
+    IO.puts("TRANSFORMED")
+    IO.inspect(transformed_data)
 
     sub_cache_name = :"cache_#{inspect(self())}"
 
@@ -102,11 +104,11 @@ defmodule Pollex.AlphabeticNebulexCache do
   def handle_call(:get, _from, %{sub_cache_name: name} = state) do
     data =
       Cache.stream(nil, name: name)
-      |> Enum.map(fn
-        {k, v} -> {k, v}
-        other -> {other, other}
+      |> Enum.reduce(%{}, fn
+        {k, v}, acc -> Map.put(acc, k, v)
+        k, acc when is_binary(k) -> acc     # ignore raw keys without value
+        _, acc -> acc
       end)
-      |> Map.new()
 
     {:reply, data, state}
   end
