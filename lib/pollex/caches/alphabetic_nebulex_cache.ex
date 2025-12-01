@@ -3,20 +3,29 @@ defmodule Pollex.AlphabeticNebulexCache do
   This module acts as a cache for data pulled from a configured database.
   It holds methods to referesh the cache and has functionality to the data up at any time.
   This cache strategy implements the Nebulex cache to support more advanced cache runtime options.
-  Basically this cache creates
+  Basically this cache creates a dynamic module which implements the Nebulex cache module.
+  This module then uses the optimised sub module to store data.
 
   Example usage:
 
   1. Configure the cache
 
-      config :pollex, Pollex.Application,
-        datasets: %{
-          unlocodes: %{
-            refresh_interval_seconds: 6,
-            cache: {NebulexCacheAdapter, [columns: [:name]]},
-            source: {AlphabeticAdapter, [table: Mosaic.City, repo: Pollex.Repo]}
-          }
+    config :pollex, Pollex.Application,
+      datasets: %{
+        cities: %{
+          refresh_interval_seconds: 6,
+          query_column: :name,
+          cache: {NebulexCacheAdapter, [columns: [:name, :country]]},
+          source: {AlphabeticAdapter, [table: Pollex.City, repo: Pollex.Repo]},
+          cache_runtime_opts: [
+            gc_interval: :timer.hours(12),
+            max_size: 1_000_000,
+            allocated_memory: 2_000_000_000,
+            gc_cleanup_min_timeout: :timer.seconds(10),
+            gc_cleanup_max_timeout: :timer.minutes(10)
+          ]
         }
+      }
 
   You configure a dataset, an interval, a table, repo and the columns you want to fetch.
   The application will start a Genserver process per letter in the alphabet holding the data starting with that letter and run for you.
