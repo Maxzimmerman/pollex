@@ -59,7 +59,6 @@ defmodule Pollex.DatasetInitializer do
   end
 
   defp start_datasets(datasets) do
-    IO.inspect(datasets)
     Enum.each(datasets, fn {dataset_name,
                             %{cache: cache, source: source, refresh_interval_seconds: rate}} ->
       case [cache, source] do
@@ -75,19 +74,19 @@ defmodule Pollex.DatasetInitializer do
              ]}
           )
 
-        [{GenServerCacheAdapter, cache_opts}, {AlphabeticAdapter, source_opts}] ->
-          for name <- ?a..?z do
-            DynamicSupervisor.start_child(
-              Pollex.DynamicSupervisor,
-              {Pollex.AlphabeticCache,
-               [
-                 name: String.to_atom(<<name>>),
-                 cache_opts: cache_opts,
-                 source_opts: source_opts,
-                 refresh_rate: rate
-               ]}
-            )
-          end
+        # [{GenServerCacheAdapter, cache_opts}, {AlphabeticAdapter, source_opts}] ->
+        #   for name <- ?a..?z do
+        #     DynamicSupervisor.start_child(
+        #       Pollex.DynamicSupervisor,
+        #       {Pollex.AlphabeticCache,
+        #        [
+        #          name: String.to_atom(<<name>>),
+        #          cache_opts: cache_opts,
+        #          source_opts: source_opts,
+        #          refresh_rate: rate
+        #        ]}
+        #     )
+        #   end
 
         [{GenServerCacheAdapter, _cache_opts}, {CSVFileSourceAdapter, _source_opts}] ->
           DynamicSupervisor.start_child(
@@ -99,17 +98,17 @@ defmodule Pollex.DatasetInitializer do
              ]}
           )
 
-        [{NebulexCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
-          DynamicSupervisor.start_child(
-            Pollex.DynamicSupervisor,
-            {Pollex.NebulexCache,
-             [
-               name: dataset_name,
-               cache_opts: cache_opts,
-               source_opts: source_opts,
-               refresh_rate: rate
-             ]}
-          )
+        # [{NebulexCacheAdapter, cache_opts}, {EctoSourceAdapter, source_opts}] ->
+        #   DynamicSupervisor.start_child(
+        #     Pollex.DynamicSupervisor,
+        #     {Pollex.NebulexCache,
+        #      [
+        #        name: dataset_name,
+        #        cache_opts: cache_opts,
+        #        source_opts: source_opts,
+        #        refresh_rate: rate
+        #      ]}
+        #   )
 
         [{NebulexCacheAdapter, cache_opts}, {AlphabeticAdapter, source_opts}] ->
           [{_dataset, %{query_column: query_column, cache_runtime_opts: cache_runtime_opts}}] = Map.to_list(datasets)
