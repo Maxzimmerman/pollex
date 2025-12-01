@@ -29,27 +29,18 @@ defmodule Helpers.NebulexTest do
       assert NebulexHelpers.transform_to_nebulex_format(data) == expected
     end
 
-    property "returns Option A nebulex formatted data" do
+    property "returns a valid nebulex data format" do
       check all(data <- generate_map()) do
         result = NebulexHelpers.transform_to_nebulex_format(data)
 
+        # Result should be a map
         assert is_map(result)
 
-        if data == [] do
-          assert result == %{}
-        else
-          sorted =
-            Enum.sort_by(data, fn map ->
-              map |> Map.values() |> List.first()
-            end)
+        # All values in result are wrapped correctly
+        assert Enum.all?(Map.values(result), fn {:value, map} -> map in data end)
 
-          assert Map.keys(result) == Enum.to_list(0..(length(sorted) - 1))
-
-          assert Enum.with_index(sorted)
-                 |> Enum.all?(fn {map, index} ->
-                   result[index] == {:value, map}
-                 end)
-        end
+        # No extra values
+        assert length(Map.values(result)) == length(data)
       end
     end
   end

@@ -47,10 +47,11 @@ defmodule Pollex.AlphabeticNebulexCache do
     interval = :timer.seconds(Keyword.fetch!(opts, :refresh_rate))
     columns = Keyword.fetch!(opts, :cache_opts)[:columns]
     cache_opts = Keyword.fetch!(opts, :cache_runtime_opts)
-    _query_column = Keyword.fetch!(opts, :query_column)
+    query_column = Keyword.fetch!(opts, :query_column)
 
     # Load initial data
-    {:ok, data} = load(table, repo, columns, Atom.to_string(genserver_name))
+    {:ok, data} =
+      load(table, repo, columns, Atom.to_string(genserver_name), Atom.to_string(query_column))
 
     transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
 
@@ -78,7 +79,8 @@ defmodule Pollex.AlphabeticNebulexCache do
        columns: columns,
        interval: interval,
        genserver_name: genserver_name,
-       cache_mod: dynamic_cache_module
+       cache_mod: dynamic_cache_module,
+       query_column: query_column
      }}
   end
 
@@ -90,11 +92,12 @@ defmodule Pollex.AlphabeticNebulexCache do
           columns: columns,
           repo: repo,
           genserver_name: genserver_name,
-          interval: interval
+          interval: interval,
+          query_column: query_column
         } = state
       ) do
     Task.Supervisor.async_nolink(Pollex.TaskSuperVisor, fn ->
-      case load(table, repo, columns, Atom.to_string(genserver_name)) do
+      case load(table, repo, columns, Atom.to_string(genserver_name), query_column) do
         {:ok, data} ->
           GenServer.cast(genserver_name, {:update, data})
 

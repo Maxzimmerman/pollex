@@ -3,7 +3,8 @@ defmodule Pollex.SrcAdapter.AlphabeticAdapter do
               table :: Ecto.Schema.t(),
               repo :: module(),
               columns :: list(atom()),
-              starting_with :: binary()
+              starting_with :: binary(),
+              query_column :: binary()
             ) :: {:ok, list() | {:error, any()}}
 
   @spec __using__(any()) :: any()
@@ -12,14 +13,14 @@ defmodule Pollex.SrcAdapter.AlphabeticAdapter do
       @behaviour Pollex.SrcAdapter.AlphabeticAdapter
       import Ecto.Query
 
-      @spec load(Ecto.Schema.t(), module(), list(), binary()) ::
+      @spec load(Ecto.Schema.t(), module(), list(), binary(), binary()) ::
               {:ok, list()} | {:error, any()}
       @impl true
-      def load(table, repo, columns, starting_with) do
+      def load(table, repo, columns, starting_with, query_column) do
         try do
           query =
             from(t in table,
-              where: ilike(t.name, ^"#{starting_with}%"),
+              where: ilike(field(t, ^query_column), ^"#{starting_with}%"),
               select: map(t, ^columns),
               distinct: true
             )
@@ -31,7 +32,7 @@ defmodule Pollex.SrcAdapter.AlphabeticAdapter do
         end
       end
 
-      defoverridable load: 4
+      defoverridable load: 5
     end
   end
 end
