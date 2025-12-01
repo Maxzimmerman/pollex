@@ -33,6 +33,7 @@ defmodule Pollex.AlphabeticNebulexCache do
   use Pollex.CacheAdapter.GenServerCacheAdapter
   alias Pollex.NebulexLocalCache, as: Cache
   alias Pollex.Helpers.Nebulex, as: NebulexHelpers
+  alias Pollex.Helpers.DynamicCache
 
   @spec init(any()) :: {:ok, map()}
   @impl true
@@ -48,20 +49,16 @@ defmodule Pollex.AlphabeticNebulexCache do
 
     {:ok, data} = load(table, repo, columns, Kernel.to_string(name))
 
-    transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
+    _transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
 
-    sub_cache_name = :"cache_#{inspect(self())}"
+    name = Kernel.to_string(name) |> String.upcase
+    dynamic_cache_module = DynamicCache.build_local_cache(:"Cache#{name}", cache_opts)
+    IO.inspect(dynamic_cache_module)
 
-    {:ok, cache_pid} =
+    # STEP 3: START IT WITH ITS OWN NAME
+    {:ok, cache_pid} = dynamic_cache_module.start_link(name: dynamic_cache_module)
 
-      Cache.start_link(
-        Keyword.merge(
-          [name: sub_cache_name],
-          cache_opts
-        )
-      )
     Process.unlink(cache_pid)
-    Cache.put_all(transformed_data, name: sub_cache_name)
 
     schedule_refresh(interval)
 
@@ -73,7 +70,7 @@ defmodule Pollex.AlphabeticNebulexCache do
        interval: interval,
        name: name,
        data: data,
-       sub_cache_name: sub_cache_name
+       cache_mod: dynamic_cache_module
      }}
   end
 
