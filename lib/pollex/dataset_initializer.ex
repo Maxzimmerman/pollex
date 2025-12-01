@@ -59,6 +59,7 @@ defmodule Pollex.DatasetInitializer do
   end
 
   defp start_datasets(datasets) do
+    IO.inspect(datasets)
     Enum.each(datasets, fn {dataset_name,
                             %{cache: cache, source: source, refresh_interval_seconds: rate}} ->
       case [cache, source] do
@@ -111,6 +112,7 @@ defmodule Pollex.DatasetInitializer do
           )
 
         [{NebulexCacheAdapter, cache_opts}, {AlphabeticAdapter, source_opts}] ->
+          [{_dataset, %{query_column: query_column, cache_runtime_opts: cache_runtime_opts}}] = Map.to_list(datasets)
           for name <- ?a..?z do
             DynamicSupervisor.start_child(
               Pollex.DynamicSupervisor,
@@ -119,7 +121,9 @@ defmodule Pollex.DatasetInitializer do
                 name: String.to_atom(<<name>>),
                 cache_opts: cache_opts,
                 source_opts: source_opts,
-                refresh_rate: rate
+                refresh_rate: rate,
+                query_column: query_column,
+                cache_runtime_opts: cache_runtime_opts
               ]}
             )
           end

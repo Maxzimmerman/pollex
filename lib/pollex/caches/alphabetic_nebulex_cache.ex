@@ -28,10 +28,10 @@ defmodule Pollex.AlphabeticNebulexCache do
         %{name: "austria"}
       ]
   """
-
   require Logger
   use Pollex.SrcAdapter.AlphabeticAdapter
   use Pollex.CacheAdapter.GenServerCacheAdapter
+  alias Pollex.NebulexLocalCache, as: Cache
   alias Pollex.Helpers.Nebulex, as: NebulexHelpers
 
   @spec init(any()) :: {:ok, map()}
@@ -42,32 +42,40 @@ defmodule Pollex.AlphabeticNebulexCache do
     repo = Keyword.fetch!(opts, :source_opts)[:repo]
     interval = Keyword.fetch!(opts, :refresh_rate)
     columns = Keyword.fetch!(opts, :cache_opts)[:columns]
-
+    cache_opts = Keyword.fetch!(opts, :cache_runtime_opts)
+    _query_column = Keyword.fetch!(opts, :query_column)
     interval = :timer.seconds(interval)
+
     {:ok, data} = load(table, repo, columns, Kernel.to_string(name))
 
     transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
 
-    # IMPORTANT — build per-letter cache module
-    cache_module = Pollex.DynamicCacheBuilder.build(name)
+    sub_cache_name = :"cache_#{inspect(self())}"
 
-    # IMPORTANT — use dynamic module, not Cache
-    cache_module.put_all(transformed_data)
+    {:ok, cache_pid} =
+
+      Cache.start_link(
+        Keyword.merge(
+          [name: sub_cache_name],
+          cache_opts
+        )
+      )
+    Process.unlink(cache_pid)
+    Cache.put_all(transformed_data, name: sub_cache_name)
 
     schedule_refresh(interval)
 
     {:ok,
-    %{
-      table: table,
-      repo: repo,
-      columns: columns,
-      interval: interval,
-      name: name,
-      data: data,
-      cache_module: cache_module
-    }}
+     %{
+       table: table,
+       repo: repo,
+       columns: columns,
+       interval: interval,
+       name: name,
+       data: data,
+       sub_cache_name: sub_cache_name
+     }}
   end
-
 
   @impl true
   def handle_info(
@@ -78,7 +86,6 @@ defmodule Pollex.AlphabeticNebulexCache do
       case load(table, repo, columns, Kernel.to_string(name)) do
         {:ok, data} ->
           GenServer.cast(name, {:update, data})
-
         {:error, reason} ->
           Logger.error("Failed to load data: #{inspect(reason)}")
       end
@@ -86,26 +93,29 @@ defmodule Pollex.AlphabeticNebulexCache do
     |> Task.ignore()
 
     schedule_refresh(interval)
+
     {:noreply, state}
   end
 
   @impl true
-  def handle_call(:get, _from, %{cache_module: cache} = state) do
+  def handle_call(:get, _from, %{sub_cache_name: name} = state) do
     data =
-      cache.stream()
-      |> Enum.map(fn
-        {k, {:value, v}} -> {to_string(k), v}
-        {k, v} -> {to_string(k), v}
+      Cache.stream(nil, name: name)
+      |> Enum.reduce(%{}, fn
+        {k, v}, acc -> Map.put(acc, k, v)
+        k, acc when is_binary(k) -> acc
+        _, acc -> acc
+
       end)
-      |> Map.new()
 
     {:reply, data, state}
   end
 
   @impl true
-  def handle_cast({:update, new_data}, %{cache_module: cache} = state) do
+  def handle_cast({:update, new_data}, %{sub_cache_name: name} = state) do
     transformed_data = NebulexHelpers.transform_to_nebulex_format(new_data)
-    cache.put_all(transformed_data)
+    Cache.put_all(transformed_data, name: name)
+
     {:noreply, state}
   end
 

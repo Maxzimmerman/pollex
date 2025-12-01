@@ -14,6 +14,7 @@ config :pollex, Pollex.Application,
   datasets: %{
     cities: %{
       refresh_interval_seconds: 6,
+      query_column: :name,
       cache: {NebulexCacheAdapter, [columns: [:name, :country]]},
       source: {AlphabeticAdapter, [table: Pollex.City, repo: Pollex.Repo]},
       cache_runtime_opts: [
