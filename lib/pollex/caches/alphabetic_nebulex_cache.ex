@@ -2,6 +2,8 @@ defmodule Pollex.AlphabeticNebulexCache do
   @moduledoc """
   This module acts as a cache for data pulled from a configured database.
   It holds methods to referesh the cache and has functionality to the data up at any time.
+  This cache strategy implements the Nebulex cache to support more advanced cache runtime options.
+  Basically this cache creates
 
   Example usage:
 
@@ -31,7 +33,6 @@ defmodule Pollex.AlphabeticNebulexCache do
   require Logger
   use Pollex.SrcAdapter.AlphabeticAdapter
   use Pollex.CacheAdapter.GenServerCacheAdapter
-  alias Pollex.NebulexLocalCache, as: Cache
   alias Pollex.Helpers.Nebulex, as: NebulexHelpers
   alias Pollex.Helpers.DynamicCache
 
@@ -49,7 +50,7 @@ defmodule Pollex.AlphabeticNebulexCache do
 
     {:ok, data} = load(table, repo, columns, Kernel.to_string(name))
 
-    _transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
+    transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
 
     name = Kernel.to_string(name) |> String.upcase
     dynamic_cache_module = DynamicCache.build_local_cache(:"Cache#{name}", cache_opts)
@@ -59,6 +60,7 @@ defmodule Pollex.AlphabeticNebulexCache do
     {:ok, cache_pid} = dynamic_cache_module.start_link(name: dynamic_cache_module)
 
     Process.unlink(cache_pid)
+    dynamic_cache_module.put_all(transformed_data)
 
     schedule_refresh(interval)
 
@@ -95,9 +97,9 @@ defmodule Pollex.AlphabeticNebulexCache do
   end
 
   @impl true
-  def handle_call(:get, _from, %{sub_cache_name: name} = state) do
+  def handle_call(:get, _from, %{cache_mod: dynamic_cache_name} = state) do
     data =
-      Cache.stream(nil, name: name)
+      dynamic_cache_name.stream(nil)
       |> Enum.reduce(%{}, fn
         {k, v}, acc -> Map.put(acc, k, v)
         k, acc when is_binary(k) -> acc
@@ -109,9 +111,9 @@ defmodule Pollex.AlphabeticNebulexCache do
   end
 
   @impl true
-  def handle_cast({:update, new_data}, %{sub_cache_name: name} = state) do
+  def handle_cast({:update, new_data}, %{cache_mod: dynamic_cache_name} = state) do
     transformed_data = NebulexHelpers.transform_to_nebulex_format(new_data)
-    Cache.put_all(transformed_data, name: name)
+    dynamic_cache_name.put_all(transformed_data)
 
     {:noreply, state}
   end
