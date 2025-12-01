@@ -5,58 +5,95 @@ defmodule AlphabeticNebulexCacheTest do
   alias Pollex.{Repo, City}
   alias Pollex.AlphabeticNebulexCache
 
-  setup do
+  # --- Test adapter to override "starting_with" behavior ---
+  defmodule TestAdapter do
+    use Pollex.SrcAdapter.AlphabeticAdapter
+
+    @impl true
+    def load(table, repo, columns, _starting_with, _query_column) do
+      query =
+        from(t in table,
+          select: map(t, ^columns),
+          distinct: true
+        )
+
+      {:ok, repo.all(query)}
+    end
+  end
+
+  # Helper to start a cache GenServer for a specific starting letter
+  defp start_cache(letter) do
+    start_supervised!(
+      {AlphabeticNebulexCache,
+       [
+         name: letter,
+         query_column: :name,
+         source_opts: [table: City, repo: Repo],
+         cache_opts: [columns: [:name]],
+         refresh_rate: 1,
+         cache_runtime_opts: [
+           gc_interval: :timer.hours(12),
+           max_size: 1_000_000,
+           allocated_memory: 2_000_000_000,
+           gc_cleanup_min_timeout: :timer.seconds(10),
+           gc_cleanup_max_timeout: :timer.minutes(10)
+         ],
+         __adapter__: TestAdapter
+       ]}
+    )
+  end
+
+  # --- Individual tests ---
+
+  test "cache loads initial state" do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
     Ecto.Adapters.SQL.Sandbox.mode(Repo, {:shared, self()})
 
-    # Insert some test data
+    # Insert test data
     Repo.insert!(%City{name: "germany"})
     Repo.insert!(%City{name: "usa"})
 
-    # Setup GenServer
-    name = :"poller_test_#{System.unique_integer([:positive])}"
-    source_opts = [table: City, repo: Repo]
-    cache_opts = [columns: [:name]]
-    interval = 1
+    # Start cache for the first letter of "germany"
+    letter = String.first("germany") |> String.to_atom()
+    pid = start_cache(letter)
 
-    sub_cache_opts = [
-      gc_interval: :timer.hours(12),
-      max_size: 1_000_000,
-      allocated_memory: 2_000_000_000,
-      gc_cleanup_min_timeout: :timer.seconds(10),
-      gc_cleanup_max_timeout: :timer.minutes(10)
-    ]
+    on_exit(fn ->
+      # Kill the GenServer after test
+      if Process.alive?(pid), do: GenServer.stop(pid)
+    end)
 
-    pid =
-      start_supervised!(
-        {AlphabeticNebulexCache,
-         [
-           name: name,
-           source_opts: source_opts,
-           cache_opts: cache_opts,
-           refresh_rate: interval,
-           cache_runtime_opts: sub_cache_opts
-         ]}
-      )
+    Process.sleep(100)
+    data = AlphabeticNebulexCache.lookup(letter)
 
-    {:ok, name: name, pid: pid}
+    assert Enum.any?(Map.values(data), fn
+             {:value, %{name: "germany"}} -> true
+             _ -> false
+           end)
   end
 
-  describe "test the cache itself" do
-    test "state updates after poll", %{name: name} do
-      Process.sleep(100)
+  test "cache updates after poll" do
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
+    Ecto.Adapters.SQL.Sandbox.mode(Repo, {:shared, self()})
 
-      data = AlphabeticNebulexCache.lookup(name)
+    Repo.insert!(%City{name: "france"})
 
-      assert Map.has_key?(data, "germany")
-      assert data["germany"] == "germany"
-    end
+    letter = String.first("france") |> String.to_atom()
+    pid = start_cache(letter)
 
-    test "initial state loads from DB", %{name: name} do
-      Process.sleep(100)
-      data = AlphabeticNebulexCache.lookup(name)
-      assert data["germany"] == "germany"
-      assert data["usa"] == "usa"
-    end
+    on_exit(fn ->
+      # Kill the GenServer after test
+      if Process.alive?(pid), do: GenServer.stop(pid)
+    end)
+
+    # Force a poll
+    send(letter, :poll)
+    Process.sleep(100)
+
+    data = AlphabeticNebulexCache.lookup(letter)
+
+    assert Enum.any?(Map.values(data), fn
+             {:value, %{name: "france"}} -> true
+             _ -> false
+           end)
   end
 end
