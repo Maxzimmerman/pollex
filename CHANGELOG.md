@@ -85,3 +85,11 @@ You can then fetch the entries matching the letter like this
 
 ## [0.5.13] - 29.10.2025
 - Put the getting started page to the top
+
+## [1.0.0] - 01.12.2025
+- Removed AlphabeticCache 
+- Removed NebulexCache
+- Added AlphabeticNebulexCache 
+
+## [1.0.1] - 01.12.2025
+- Added tutorial for AlpahbeticNebulexCache

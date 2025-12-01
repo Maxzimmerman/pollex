@@ -4,7 +4,7 @@ defmodule Pollex.MixProject do
   def project do
     [
       app: :pollex,
-      version: "0.5.13",
+      version: "1.0.1",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -24,12 +24,14 @@ defmodule Pollex.MixProject do
         "README.md": [title: "Overview"],
         "guides/GETTING_STARTED.md": [title: "Getting Started"],
         "guides/caches/ECTOGENSERVERCACHE.md": [title: "EctoGenServerCache"],
-        "guides/caches/CSVGENSERVERCACHE.md": [title: "CSVGenServerCache"]
+        "guides/caches/CSVGENSERVERCACHE.md": [title: "CSVGenServerCache"],
+        "guides/caches/ALPHABETICNEBULEXCACHE.md": [title: "AlphabeticNebulexCache"]
       ],
       groups_for_extras: [
         Tutorials: [
           "guides/caches/ECTOGENSERVERCACHE.md",
-          "guides/caches/CSVGENSERVERCACHE.md"
+          "guides/caches/CSVGENSERVERCACHE.md",
+          "guides/caches/ALPHABETICNEBULEXCACHE.md"
         ]
       ]
     ]
