@@ -5,22 +5,6 @@ defmodule AlphabeticNebulexCacheTest do
   alias Pollex.{Repo, City}
   alias Pollex.AlphabeticNebulexCache
 
-  # --- Test adapter to override "starting_with" behavior ---
-  defmodule TestAdapter do
-    use Pollex.SrcAdapter.AlphabeticAdapter
-
-    @impl true
-    def load(table, repo, columns, _starting_with, _query_column) do
-      query =
-        from(t in table,
-          select: map(t, ^columns),
-          distinct: true
-        )
-
-      {:ok, repo.all(query)}
-    end
-  end
-
   # Helper to start a cache GenServer for a specific starting letter
   defp start_cache(letter) do
     start_supervised!(
