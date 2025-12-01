@@ -30,36 +30,43 @@ defmodule Pollex.AlphabeticNebulexCache do
         %{name: "austria"}
       ]
   """
+
   require Logger
   use Pollex.SrcAdapter.AlphabeticAdapter
   use Pollex.CacheAdapter.GenServerCacheAdapter
+
   alias Pollex.Helpers.Nebulex, as: NebulexHelpers
   alias Pollex.Helpers.DynamicCache
 
   @spec init(any()) :: {:ok, map()}
   @impl true
   def init(opts) do
-    name = Keyword.fetch!(opts, :name)
+    genserver_name = Keyword.fetch!(opts, :name)
     table = Keyword.fetch!(opts, :source_opts)[:table]
     repo = Keyword.fetch!(opts, :source_opts)[:repo]
-    interval = Keyword.fetch!(opts, :refresh_rate)
+    interval = :timer.seconds(Keyword.fetch!(opts, :refresh_rate))
     columns = Keyword.fetch!(opts, :cache_opts)[:columns]
     cache_opts = Keyword.fetch!(opts, :cache_runtime_opts)
     _query_column = Keyword.fetch!(opts, :query_column)
-    interval = :timer.seconds(interval)
 
-    {:ok, data} = load(table, repo, columns, Kernel.to_string(name))
+    # Load initial data
+    {:ok, data} = load(table, repo, columns, Atom.to_string(genserver_name))
 
     transformed_data = NebulexHelpers.transform_to_nebulex_format(data)
 
-    name = Kernel.to_string(name) |> String.upcase
-    dynamic_cache_module = DynamicCache.build_local_cache(:"Cache#{name}", cache_opts)
-    IO.inspect(dynamic_cache_module)
+    # Build a unique dynamic cache module
+    module_suffix =
+      genserver_name
+      |> Atom.to_string()
+      |> String.upcase()
 
-    # STEP 3: START IT WITH ITS OWN NAME
+    dynamic_cache_module =
+      DynamicCache.build_local_cache(:"Cache#{module_suffix}", cache_opts)
+
+    # Start the local cache instance
     {:ok, cache_pid} = dynamic_cache_module.start_link(name: dynamic_cache_module)
-
     Process.unlink(cache_pid)
+
     dynamic_cache_module.put_all(transformed_data)
 
     schedule_refresh(interval)
@@ -70,8 +77,7 @@ defmodule Pollex.AlphabeticNebulexCache do
        repo: repo,
        columns: columns,
        interval: interval,
-       name: name,
-       data: data,
+       genserver_name: genserver_name,
        cache_mod: dynamic_cache_module
      }}
   end
@@ -79,12 +85,19 @@ defmodule Pollex.AlphabeticNebulexCache do
   @impl true
   def handle_info(
         :poll,
-        %{table: table, columns: columns, repo: repo, name: name, interval: interval} = state
+        %{
+          table: table,
+          columns: columns,
+          repo: repo,
+          genserver_name: genserver_name,
+          interval: interval
+        } = state
       ) do
     Task.Supervisor.async_nolink(Pollex.TaskSuperVisor, fn ->
-      case load(table, repo, columns, Kernel.to_string(name)) do
+      case load(table, repo, columns, Atom.to_string(genserver_name)) do
         {:ok, data} ->
-          GenServer.cast(name, {:update, data})
+          GenServer.cast(genserver_name, {:update, data})
+
         {:error, reason} ->
           Logger.error("Failed to load data: #{inspect(reason)}")
       end
@@ -92,29 +105,27 @@ defmodule Pollex.AlphabeticNebulexCache do
     |> Task.ignore()
 
     schedule_refresh(interval)
-
     {:noreply, state}
   end
 
   @impl true
-  def handle_call(:get, _from, %{cache_mod: dynamic_cache_name} = state) do
+  def handle_call(:get, _from, %{cache_mod: cache_mod} = state) do
     data =
-      dynamic_cache_name.stream(nil)
-      |> Enum.reduce(%{}, fn
-        {k, v}, acc -> Map.put(acc, k, v)
-        k, acc when is_binary(k) -> acc
-        _, acc -> acc
-
+      cache_mod.stream()
+      |> Enum.reduce(%{}, fn key, acc ->
+        case cache_mod.get(key) do
+          nil -> acc
+          value -> Map.put(acc, key, value)
+        end
       end)
 
     {:reply, data, state}
   end
 
   @impl true
-  def handle_cast({:update, new_data}, %{cache_mod: dynamic_cache_name} = state) do
-    transformed_data = NebulexHelpers.transform_to_nebulex_format(new_data)
-    dynamic_cache_name.put_all(transformed_data)
-
+  def handle_cast({:update, new_data}, %{cache_mod: cache_mod} = state) do
+    transformed = NebulexHelpers.transform_to_nebulex_format(new_data)
+    cache_mod.put_all(transformed)
     {:noreply, state}
   end
 

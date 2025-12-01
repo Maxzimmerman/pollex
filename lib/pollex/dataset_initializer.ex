@@ -111,19 +111,21 @@ defmodule Pollex.DatasetInitializer do
         #   )
 
         [{NebulexCacheAdapter, cache_opts}, {AlphabeticAdapter, source_opts}] ->
-          [{_dataset, %{query_column: query_column, cache_runtime_opts: cache_runtime_opts}}] = Map.to_list(datasets)
+          [{_dataset, %{query_column: query_column, cache_runtime_opts: cache_runtime_opts}}] =
+            Map.to_list(datasets)
+
           for name <- ?a..?z do
             DynamicSupervisor.start_child(
               Pollex.DynamicSupervisor,
               {Pollex.AlphabeticNebulexCache,
-              [
-                name: String.to_atom(<<name>>),
-                cache_opts: cache_opts,
-                source_opts: source_opts,
-                refresh_rate: rate,
-                query_column: query_column,
-                cache_runtime_opts: cache_runtime_opts
-              ]}
+               [
+                 name: String.to_atom(<<name>>),
+                 cache_opts: cache_opts,
+                 source_opts: source_opts,
+                 refresh_rate: rate,
+                 query_column: query_column,
+                 cache_runtime_opts: cache_runtime_opts
+               ]}
             )
           end
       end

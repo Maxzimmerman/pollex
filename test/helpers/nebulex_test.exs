@@ -5,7 +5,7 @@ defmodule Helpers.NebulexTest do
   alias Pollex.Helpers.Nebulex, as: NebulexHelpers
 
   describe "transform_to_nebulex_format/1" do
-    test "transforms list of maps into a map keyed by the first value string of each map" do
+    test "transforms list of maps into a map keyed by sorted order of first value" do
       data = [
         %{name: "germany"},
         %{code: "usa"},
@@ -17,29 +17,38 @@ defmodule Helpers.NebulexTest do
       ]
 
       expected = %{
-        "australia" => %{country: "australia"},
-        "austria" => %{iso: "austria"},
-        "azerbaijan" => %{abbr: "azerbaijan"},
-        "germany" => %{name: "germany"},
-        "russia" => %{region: "russia"},
-        "united kingdom" => %{label: "united kingdom"},
-        "usa" => %{code: "usa"}
+        0 => {:value, %{country: "australia"}},
+        1 => {:value, %{iso: "austria"}},
+        2 => {:value, %{abbr: "azerbaijan"}},
+        3 => {:value, %{name: "germany"}},
+        4 => {:value, %{region: "russia"}},
+        5 => {:value, %{label: "united kingdom"}},
+        6 => {:value, %{code: "usa"}}
       }
 
       assert NebulexHelpers.transform_to_nebulex_format(data) == expected
     end
 
-    property "returns a valid nebulex data forma" do
+    property "returns Option A nebulex formatted data" do
       check all(data <- generate_map()) do
         result = NebulexHelpers.transform_to_nebulex_format(data)
 
         assert is_map(result)
 
-        assert Enum.all?(Map.values(result), &(&1 in data))
+        if data == [] do
+          assert result == %{}
+        else
+          sorted =
+            Enum.sort_by(data, fn map ->
+              map |> Map.values() |> List.first()
+            end)
 
-        for {_k, v} <- result do
-          [{_key, value}] = Map.to_list(v)
-          assert Map.has_key?(result, to_string(value))
+          assert Map.keys(result) == Enum.to_list(0..(length(sorted) - 1))
+
+          assert Enum.with_index(sorted)
+                 |> Enum.all?(fn {map, index} ->
+                   result[index] == {:value, map}
+                 end)
         end
       end
     end

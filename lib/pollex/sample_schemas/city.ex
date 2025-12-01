@@ -8,7 +8,7 @@ defmodule Pollex.City do
 
   @primary_key {:name, :string, autogenerate: false}
   schema "cities" do
-    field :country, :string
+    field(:country, :string)
   end
 
   @doc false

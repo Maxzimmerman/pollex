@@ -24,12 +24,12 @@ defmodule Pollex.MixProject do
         "README.md": [title: "Overview"],
         "guides/GETTING_STARTED.md": [title: "Getting Started"],
         "guides/caches/ECTOGENSERVERCACHE.md": [title: "EctoGenServerCache"],
-        "guides/caches/CSVGENSERVERCACHE.md": [title: "CSVGenServerCache"],
+        "guides/caches/CSVGENSERVERCACHE.md": [title: "CSVGenServerCache"]
       ],
       groups_for_extras: [
         Tutorials: [
           "guides/caches/ECTOGENSERVERCACHE.md",
-          "guides/caches/CSVGENSERVERCACHE.md",
+          "guides/caches/CSVGENSERVERCACHE.md"
         ]
       ]
     ]
